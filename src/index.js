@@ -4,6 +4,7 @@ import { fileURLToPath }   from 'node:url';
 import { resolve }         from 'import-meta-resolve';
 import { compile }         from 'svelte/compiler';
 import { svelte2tsx }      from 'svelte2tsx';
+import upath               from 'upath';
 
 /**
  * Provides a plugin for `esm-d-ts` to handle Svelte components.
@@ -11,21 +12,34 @@ import { svelte2tsx }      from 'svelte2tsx';
 class DTSPluginSvelte
 {
    /**
+    * Handles postprocessing generated DTS files.
+    */
+   postprocessDTS({ processedConfig })
+   {
+      const { compileFilepaths } = processedConfig;
+
+console.log(`!!! DPS - postprocessDTS - compileFilepaths: `, compileFilepaths);
+   }
+
+   /**
     * Transform any Svelte files via `svelte2tsx` before TSC compilation.
     *
     * @param {object}   data - Data.
     *
-    * @param {string[]} data.filepaths - File paths being compiled by TSC.
-    *
     * @param {Map<string, string>}  data.memoryFiles - Stores transformed code and temp paths.
+    *
+    * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - Processed config from
+    *        `esm-d-ts` that contains the filepaths being compiled.
     */
-   compileTransform({ filepaths, memoryFiles })
+   transformCompile({ memoryFiles, processedConfig })
    {
+      const { compileFilepaths } = processedConfig;
+
       let hasSvelte = false;
 
-      for (let cntr = filepaths.length; --cntr >= 0;)
+      for (let cntr = compileFilepaths.length; --cntr >= 0;)
       {
-         const filepath = filepaths[cntr];
+         const filepath = compileFilepaths[cntr];
          if (filepath.endsWith('.svelte'))
          {
             hasSvelte = true;
@@ -45,7 +59,7 @@ class DTSPluginSvelte
                });
 
                memoryFiles.set(tempPath, tsx.code);
-               filepaths[cntr] = tempPath;
+               compileFilepaths[cntr] = tempPath;
             }
             catch (err)
             {
@@ -60,16 +74,8 @@ class DTSPluginSvelte
       if (hasSvelte)
       {
          const svelteShims = fileURLToPath(resolve('svelte2tsx/svelte-shims-v4.d.ts', import.meta.url));
-         filepaths.push(svelteShims);
+         compileFilepaths.push(upath.toUnix(svelteShims));
       }
-   }
-
-   /**
-    * Handles postprocessing generated DTS files.
-    */
-   dtsPostprocess()
-   {
-
    }
 
    /**
@@ -81,7 +87,7 @@ class DTSPluginSvelte
     *
     * @returns {string} Compiled JS section of Svelte component.
     */
-   lexerTransform({ fileData })
+   transformLexer({ fileData })
    {
       const { js } = compile(fileData);
       return js.code;
@@ -96,9 +102,9 @@ class DTSPluginSvelte
 
       const options = { guard: true, sync: true };
 
-      eventbus.on('compile:transform', this.compileTransform, this, options);
-      eventbus.on('dts:postprocess', this.dtsPostprocess, this, options);
-      eventbus.on('lexer:transform:.svelte', this.lexerTransform, this, options);
+      eventbus.on('postprocess:dts', this.postprocessDTS, this, options);
+      eventbus.on('transform:compile', this.transformCompile, this, options);
+      eventbus.on('transform:lexer:.svelte', this.transformLexer, this, options);
    }
 }
 
