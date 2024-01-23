@@ -1,0 +1,51 @@
+{
+  "name": "@typhonjs-build-test/esm-d-ts-plugin-svelte",
+  "description": "Experimental `esm-d-ts` plugin to generate declarations for Svelte 4 components",
+  "version": "0.0.0",
+  "author": "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "contributors": [
+    "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)"
+  ],
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@typhonjs-config/eslint-config" : "^0.6.0",
+    "@typhonjs-plugin/manager": "^0.1.2",
+    "eslint": "^8.56.0"
+ },
+  "peerDependencies": {
+    "import-meta-resolve": ">=4.0.0",
+    "svelte": "4",
+    "svelte2tsx": ">=0.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "/src"
+  ],
+  "homepage": "https://github.com/typhonjs-node-build-test/esm-d-ts-plugin-svelte#readme",
+  "keywords": [
+    "typhonjs",
+    "build",
+    "esm-d-ts",
+    "declarations",
+    "plugin",
+    "svelte"
+  ],
+  "license": "MPL-2.0",
+  "repository": "github:typhonjs-node-build-test/esm-d-ts-plugin-svelte",
+  "bugs": "https://github.com/typhonjs-node-build-test/esm-d-ts-plugin-svelte/issues",
+  "apidocs": "https://typhonjs-node-build-test.github.io/esm-d-ts-plugin-svelte/",
+  "scripts": {
+    "eslint": "eslint ."
+  }
+}
