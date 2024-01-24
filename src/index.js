@@ -2,6 +2,7 @@ import fs                  from 'node:fs';
 import { fileURLToPath }   from 'node:url';
 
 import { getFileList }     from '@typhonjs-utils/file-util';
+import { isObject }        from '@typhonjs-utils/object';
 import { resolve }         from 'import-meta-resolve';
 import { compile }         from 'svelte/compiler';
 import { svelte2tsx }      from 'svelte2tsx';
@@ -17,6 +18,29 @@ import upath               from 'upath';
 class DTSPluginSvelte
 {
    static #regexTypedef = /\/\*\*[\s\S]*?@typedef[\s\S]*?__propDef[\s\S]*?\*\/\s*/g;
+
+   /**
+    * Svelte v4 types will add a triple slash reference `/// <reference types="svelte" />` for generated types.
+    * To remove it a regex is added to `dtsReplace`.
+    *
+    * @param {object}   data - Event data.
+    *
+    * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
+    *        configuration data.
+    */
+   lifecycleStart({ processedConfig })
+   {
+      const { generateConfig } = processedConfig;
+
+      if (isObject(generateConfig?.dtsReplace))
+      {
+         generateConfig.dtsReplace['/\\/\\/ <reference.*\\/>'] = '';
+      }
+      else
+      {
+         generateConfig.dtsReplace = { '/\\/\\/ <reference.*\\/>': '' };
+      }
+   }
 
    /**
     * Handles postprocessing intermediate generated DTS files.
@@ -218,6 +242,7 @@ class DTSPluginSvelte
 
       const options = { guard: true, sync: true };
 
+      eventbus.on('lifecycle:start', this.lifecycleStart, this, options);
       eventbus.on('postprocess:dts', this.postprocessDTS, this, options);
       eventbus.on('transform:compile', this.transformCompile, this, options);
       eventbus.on('transform:lexer:.svelte', this.transformLexer, this, options);
