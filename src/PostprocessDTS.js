@@ -17,7 +17,7 @@ export class PostprocessDTS
    /**
     * @param {object}   data - Data.
     *
-    * @param {import('./JSDocCommentParser.js').JSDocResults} comments - Any parsed comments.
+    * @param {import('./JSDocCommentParser.js').ComponentJSDoc} comments - Any parsed comments.
     *
     * @param {import('@typhonjs-utils/logger-color').ColorLogger} data.logger -
     *
@@ -32,7 +32,7 @@ export class PostprocessDTS
     * Transforms the default declaration output of `svelte2tsx` creating a better declaration structure for
     * consumption and documentation.
     *
-    * @param {import('./JSDocCommentParser.js').JSDocResults} comments - Any parsed comments.
+    * @param {import('./JSDocCommentParser.js').ComponentJSDoc} comments - Any parsed comments.
     *
     * @param {import('@typhonjs-utils/logger-color').ColorLogger} logger -
     *

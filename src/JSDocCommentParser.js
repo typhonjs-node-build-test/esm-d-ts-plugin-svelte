@@ -101,7 +101,7 @@ export class JSDocCommentParser
     *
     * @param {import('@typhonjs-utils/logger-color').ColorLogger} logger - `esm-d-ts` logger instance.
     *
-    * @returns {JSDocResults | undefined} Parsed JSDoc comment blocks for component description and exported props if
+    * @returns {ComponentJSDoc | undefined} Parsed JSDoc comment blocks for component description and exported props if
     *          defined.
     */
    static processScript(code, filepath, relativeFilepath, logger)
@@ -191,7 +191,7 @@ export class JSDocCommentParser
 }
 
 /**
- * @typedef {object} JSDocResults
+ * @typedef {object} ComponentJSDoc
  *
  * @property {import('ts-morph').JSDocStructure} componentDescription The first `@componentDescription` comment block.
  *
