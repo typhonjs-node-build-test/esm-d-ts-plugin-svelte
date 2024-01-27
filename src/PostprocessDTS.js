@@ -4,7 +4,13 @@ import {
 import ts            from 'typescript';
 
 /**
- * Provides the postprocessing of the intermediate Svelte component declarations.
+ * Provides the postprocessing of the intermediate Svelte component declarations transforming the declaration format
+ * to a better structure for library consumption. Instead of named type alias exports the output of `svelte2tsx` is
+ * transformed into a namespace w/ exported type aliases that matches the name of the Svelte component. This allows the
+ * entire declaration for a Svelte component to be exported when
+ * `export { default as <COMPONENT_NAME> } from './<COMPONENT_NAME>.svelte'` is utilized.
+ *
+ * JSDoc comments are also rejoined to the generated declaration for props and a component header comment.
  */
 export class PostprocessDTS
 {
@@ -48,10 +54,9 @@ export class PostprocessDTS
       classDeclaration.setIsExported(false);
       classDeclaration.setHasDeclareKeyword(true);
 
-      // TODO: Finish adding JSDoc comments as applicable.
       if (comments?.componentDescription)
       {
-         // classDeclaration.addJsDoc({ description: '', tags: [{ tagName: }] })
+         classDeclaration.addJsDoc(comments.componentDescription);
       }
 
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
@@ -107,6 +112,26 @@ export class PostprocessDTS
 
       namespace.addJsDoc({ description: `Event / Prop / Slot type aliases for {@link ${className}}.` });
 
+      if (comments?.props.size)
+      {
+         const propTypeNode = propAlias.getTypeNode();
+
+         if (Node.isTypeElementMembered(propTypeNode))
+         {
+            for (const propertyNode of propTypeNode.getProperties())
+            {
+               const propertyName = propertyNode.getName();
+               if (comments.props.has(propertyName))
+               {
+                  // Note: due to a `prettier` bug the full text must be manipulated instead of working with
+                  // `JSDocStructure` / `addJsDoc`.
+                  const fullText = propertyNode.getFullText();
+                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${fullText}`);
+               }
+            }
+         }
+      }
+
       // Remove all type aliases -------------------------------------------------------------------------------------
 
       const typeAliases = sourceFile.getTypeAliases();
@@ -115,7 +140,5 @@ export class PostprocessDTS
       // Add default export ------------------------------------------------------------------------------------------
 
       sourceFile.addExportAssignment({ expression: className, isExportEquals: false });
-
-      return true;
    }
 }

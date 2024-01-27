@@ -98,7 +98,8 @@ export class DTSPluginSvelte
          const fileData = fs.readFileSync(filepath, 'utf-8');
          fs.writeFileSync(filepath, fileData.replaceAll(DTSPluginSvelte.#regexTypedef, ''));
 
- console.log(`!!! DPS - postprocessDTS - has entry: ${this.#componentComments.has(relativeFilepath)}; relativeFilepath: ${relativeFilepath}`)
+         // TODO: Remove logging
+         // console.log(`!!! DPS - postprocessDTS - has entry: ${this.#componentComments.has(relativeFilepath)}; relativeFilepath: ${relativeFilepath}`)
 
          PostProcess.process({
             filepath,
@@ -164,7 +165,13 @@ export class DTSPluginSvelte
                   const jsdocResult = JSDocCommentParser.processScript(match.groups.contents, filepath,
                    relativeFilepath, logger);
 
-                  if (jsdocResult) { this.#componentComments.set(`${relativeFilepath}.d.ts`, jsdocResult); }
+                  // TODO: Remove logging
+                  // console.log(`!!! DPS - transformCompile - relativeFilepath: ${relativeFilepath} - jsdocResult: `, jsdocResult)
+
+                  if (jsdocResult)
+                  {
+                     this.#componentComments.set(`${relativeFilepath}.d.ts`, jsdocResult);
+                  }
                }
             }
             catch (err)
