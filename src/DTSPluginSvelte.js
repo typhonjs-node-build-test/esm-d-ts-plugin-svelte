@@ -215,9 +215,11 @@ export class DTSPluginSvelte
 
       const options = { guard: true, sync: true };
 
+      // Event registration in the order which the events are fired.
+
       eventbus.on('lifecycle:start', this.lifecycleStart, this, options);
-      eventbus.on('postprocess:dts', this.postprocessDTS, this, options);
-      eventbus.on('transform:compile', this.transformCompile, this, options);
-      eventbus.on('transform:lexer:.svelte', this.transformLexer, this, options);
+      eventbus.on('lexer:transform:.svelte', this.transformLexer, this, options);
+      eventbus.on('compile:transform', this.transformCompile, this, options);
+      eventbus.on('compile:end', this.postprocessDTS, this, options);
    }
 }
