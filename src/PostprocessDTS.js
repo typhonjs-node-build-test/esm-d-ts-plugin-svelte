@@ -10,7 +10,11 @@ import ts            from 'typescript';
  * entire declaration for a Svelte component to be exported when
  * `export { default as <COMPONENT_NAME> } from './<COMPONENT_NAME>.svelte'` is utilized.
  *
- * JSDoc comments are also rejoined to the generated declaration for props and a component header comment.
+ * JSDoc comments are also rejoined to the generated declaration for props and a component header comment that is
+ * marked by the `@componentDescription` tag.
+ *
+ * The rejoining of comments uses `replaceWithText` on declaration nodes instead of `addJsDoc` working with `ts-morph`
+ * structures as both do a full replacement on the source file text.
  */
 export class PostprocessDTS
 {
@@ -56,7 +60,7 @@ export class PostprocessDTS
 
       if (comments?.componentDescription)
       {
-         classDeclaration.addJsDoc(comments.componentDescription);
+         classDeclaration.replaceWithText(`${comments.componentDescription}\n${classDeclaration.getFullText()}`);
       }
 
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
@@ -123,10 +127,7 @@ export class PostprocessDTS
                const propertyName = propertyNode.getName();
                if (comments.props.has(propertyName))
                {
-                  // Note: due to a `prettier` bug the full text must be manipulated instead of working with
-                  // `JSDocStructure` / `addJsDoc`.
-                  const fullText = propertyNode.getFullText();
-                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${fullText}`);
+                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${propertyNode.getFullText()}`);
                }
             }
          }
