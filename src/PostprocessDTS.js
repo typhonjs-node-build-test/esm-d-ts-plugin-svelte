@@ -50,7 +50,7 @@ export class PostprocessDTS
       const classDeclaration = sourceFile.getDefaultExportSymbol()?.getDeclarations()?.[0];
       if (!classDeclaration)
       {
-         // TODO: Cancel processing
+         throw new Error('[plugin-svelte] PostprocessDTS error: Could not locate default exported component class.');
       }
 
       const className = classDeclaration.getName();
@@ -64,10 +64,10 @@ export class PostprocessDTS
       }
 
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
-
       if (!heritageClause)
       {
-         // TODO: Cancel processing
+         throw new Error(
+          '[plugin-svelte] PostprocessDTS error: Could not locate extends heritage clause for component class.');
       }
 
       const svelteComponentTypeArgs = heritageClause.getTypeNodes()[0];
@@ -87,10 +87,9 @@ export class PostprocessDTS
       // Extract type alias definitions from `__propDef` variable ----------------------------------------------------
 
       const propDef = sourceFile.getVariableDeclaration('__propDef');
-
       if (!propDef)
       {
-         // TODO: Cancel processing
+         throw new Error(`[plugin-svelte] PostprocessDTS error: Could not locate '__propDef' type alias.`);
       }
 
       const propsType = propDef.getType().getProperty('props').getValueDeclaration().getType().getText();

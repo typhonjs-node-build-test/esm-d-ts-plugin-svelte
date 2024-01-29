@@ -29,7 +29,7 @@ export class DTSPluginSvelte
     *
     * @type {RegExp}
     */
-   static #regexScriptIsTS = /<script\s+[^>]*?lang=('|")(ts|typescript)('|")/;
+   static #regexScriptIsTS = /<script\s+[^>]*?lang=['"](ts|typescript)['"]/;
 
    /**
     * Detects an intermediate DTS Svelte filename extension.
@@ -110,43 +110,34 @@ export class DTSPluginSvelte
 
             hasSvelte = true;
 
-            try
+            // Any exceptions raised are caught by `esm-d-ts`.
+
+            const code = fs.readFileSync(filepath, 'utf-8').toString();
+            const isTsFile = DTSPluginSvelte.#regexScriptIsTS.test(code);
+
+            const tempPath = `${filepath}${isTsFile ? '.ts' : '.js'}`;
+
+            const tsx = svelte2tsx(code, {
+               filename: filepath,
+               isTsFile,
+               mode: 'dts',
+               noSvelteComponentTyped: true
+            });
+
+            memoryFiles.set(tempPath, tsx.code);
+            compileFilepaths[cntr] = tempPath;
+
+            // Process script contents for JSDoc comments.
+            const match = DTSPluginSvelte.#regexScriptContent.exec(code);
+            if (match)
             {
-               const code = fs.readFileSync(filepath, 'utf-8').toString();
-               const isTsFile = DTSPluginSvelte.#regexScriptIsTS.test(code);
+               const jsdocResult = JSDocCommentParser.processScript(match.groups.contents, filepath,
+                relativeFilepath, logger);
 
-               const tempPath = `${filepath}${isTsFile ? '.ts' : '.js'}`;
-
-               const tsx = svelte2tsx(code, {
-                  filename: filepath,
-                  isTsFile,
-                  mode: 'dts',
-                  noSvelteComponentTyped: true
-               });
-
-               memoryFiles.set(tempPath, tsx.code);
-               compileFilepaths[cntr] = tempPath;
-
-               // Process script contents for JSDoc comments.
-               const match = DTSPluginSvelte.#regexScriptContent.exec(code);
-               if (match)
+               if (jsdocResult)
                {
-                  const jsdocResult = JSDocCommentParser.processScript(match.groups.contents, filepath,
-                   relativeFilepath, logger);
-
-                  // TODO: Remove logging
-                  // console.log(`!!! DPS - compileTransform - relativeFilepath: ${relativeFilepath} - jsdocResult: `, jsdocResult)
-
-                  if (jsdocResult)
-                  {
-                     this.#componentComments.set(`${relativeFilepath}.d.ts`, jsdocResult);
-                  }
+                  this.#componentComments.set(`${relativeFilepath}.d.ts`, jsdocResult);
                }
-            }
-            catch (err)
-            {
-               // TODO: handle error and remove file from compilation.
-               throw err;
             }
          }
       }
@@ -204,8 +195,8 @@ export class DTSPluginSvelte
     *
     * @param {object} data - Event data.
     *
-    * @param {import('@typhonjs-build-test/esm-d-ts/postprocess').PostProcess} data.PostProcess - Post process manager
-    *        from `esm-d-ts`.
+    * @param {typeof import('@typhonjs-build-test/esm-d-ts/postprocess').PostProcess} data.PostProcess - Post process
+    *        manager from `esm-d-ts`.
     *
     * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
     *        configuration data.
@@ -228,9 +219,6 @@ export class DTSPluginSvelte
          // Pre-process to remove spurious typedef JSDoc comments.
          const fileData = fs.readFileSync(filepath, 'utf-8');
          fs.writeFileSync(filepath, fileData.replaceAll(DTSPluginSvelte.#regexTypedef, ''));
-
-         // TODO: Remove logging
-         // console.log(`!!! DPS - postprocessDTS - has entry: ${this.#componentComments.has(relativeFilepath)}; relativeFilepath: ${relativeFilepath}`)
 
          PostProcess.process({
             filepath,
