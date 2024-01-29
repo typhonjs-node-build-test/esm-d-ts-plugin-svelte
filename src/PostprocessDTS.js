@@ -60,7 +60,7 @@ export class PostprocessDTS
 
       if (comments?.componentDescription)
       {
-         classDeclaration.replaceWithText(`${comments.componentDescription}\n${classDeclaration.getFullText()}`);
+         classDeclaration.replaceWithText(`${comments.componentDescription}\n${classDeclaration.getText()}`);
       }
 
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
@@ -89,7 +89,7 @@ export class PostprocessDTS
       const propDef = sourceFile.getVariableDeclaration('__propDef');
       if (!propDef)
       {
-         throw new Error(`[plugin-svelte] PostprocessDTS error: Could not locate '__propDef' type alias.`);
+         throw new Error(`[plugin-svelte] PostprocessDTS error: Could not locate '__propDef' variable.`);
       }
 
       const propsType = propDef.getType().getProperty('props').getValueDeclaration().getType().getText();
@@ -109,13 +109,14 @@ export class PostprocessDTS
       const eventAlias = namespace.addTypeAlias({ name: 'Events', type: eventsType, isExported: true });
       const slotAlias = namespace.addTypeAlias({ name: 'Slots', type: slotsType, isExported: true });
 
-      propAlias.addJsDoc({ description: `Props type alias for {@link ${className}}.` });
-      eventAlias.addJsDoc({ description: `Events type alias for {@link ${className}}.` });
-      slotAlias.addJsDoc({ description: `Slots type alias for {@link ${className}}.` });
+      propAlias.addJsDoc({ description: `Props type alias for {@link ${className} | associated component}.` });
+      eventAlias.addJsDoc({ description: `Events type alias for {@link ${className} | associated component}.` });
+      slotAlias.addJsDoc({ description: `Slots type alias for {@link ${className} | associated component}.` });
 
-      namespace.addJsDoc({ description: `Event / Prop / Slot type aliases for {@link ${className}}.` });
+      namespace.addJsDoc(
+       { description: `Event / Prop / Slot type aliases for {@link ${className} | associated component}.` });
 
-      if (comments?.props.size)
+      if (comments?.props?.size)
       {
          const propTypeNode = propAlias.getTypeNode();
 
@@ -126,7 +127,7 @@ export class PostprocessDTS
                const propertyName = propertyNode.getName();
                if (comments.props.has(propertyName))
                {
-                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${propertyNode.getFullText()}`);
+                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${propertyNode.getText()}`);
                }
             }
          }
@@ -136,6 +137,33 @@ export class PostprocessDTS
 
       const typeAliases = sourceFile.getTypeAliases();
       for (const typeAlias of typeAliases) { typeAlias.remove(); }
+
+      // Add comments to all accessors linking them to the props type alias / definition. ----------------------------
+
+      if (comments?.propNames?.size)
+      {
+         const accessorsGet = classDeclaration.getGetAccessors();
+         for (const accessorGet of accessorsGet)
+         {
+            const propName = accessorGet.getName();
+            if (comments.propNames.has(propName))
+            {
+               const newComment = `/** Getter for {@link ${className}.Props.${propName} | ${propName}} prop. */`;
+               accessorGet.replaceWithText(`\n${newComment}\n${accessorGet.getText()}`);
+            }
+         }
+
+         const accessorsSet = classDeclaration.getSetAccessors();
+         for (const accessorSet of accessorsSet)
+         {
+            const propName = accessorSet.getName();
+            if (comments.propNames.has(propName))
+            {
+               const newComment = `/** Setter for {@link ${className}.Props.${propName} | ${propName}} prop. */`;
+               accessorSet.replaceWithText(`\n${newComment}\n${accessorSet.getText()}`);
+            }
+         }
+      }
 
       // Add default export ------------------------------------------------------------------------------------------
 

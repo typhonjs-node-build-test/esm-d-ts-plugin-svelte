@@ -69,7 +69,8 @@ export class JSDocCommentParser
 
       const result = {
          componentDescription: void 0,
-         props: new Map()
+         props: new Map(),
+         propNames: new Set()
       }
 
       const warnings = {
@@ -114,9 +115,15 @@ export class JSDocCommentParser
          if (depth === 0) { lastComment = jsdocComments.lastComment; }
 
          // If a named declaration node is exported store the last comment block.
-         if (isNamedDeclaration(node) && node.isExported() && lastComment)
+         if (isNamedDeclaration(node) && node.isExported())
          {
-            result.props.set(node.getName(), lastComment);
+            const propName = node.getName();
+
+            // Store comment for prop.
+            if (lastComment) { result.props.set(propName, lastComment); }
+
+            // Add to all prop names Set.
+            result.propNames.add(propName)
          }
 
          // Recursively iterate over each child node
@@ -134,7 +141,7 @@ export class JSDocCommentParser
           relativeFilepath}`);
       }
 
-      return result.componentDescription || result.props.size ? result : void 0;
+      return result;
    }
 }
 
@@ -144,4 +151,6 @@ export class JSDocCommentParser
  * @property {string} componentDescription The first `@componentDescription` comment block.
  *
  * @property {Map<string, string>}  props Map of prop names to last leading comment block.
+ *
+ * @property {Set<string>}  propNames A Set of all prop names regardless if they have comments or not.
  */
