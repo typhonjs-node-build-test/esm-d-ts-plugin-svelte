@@ -86,7 +86,7 @@ export class DTSPluginSvelte
     *
     * @param {object}   data - Data.
     *
-    * @param {import('@typhonjs-utils/logger-color').ColorLogger} logger -
+    * @param {import('@typhonjs-utils/logger-color').ColorLogger} data.logger - Logger instance.
     *
     * @param {Map<string, string>}  data.memoryFiles - Stores transformed code and temp paths.
     *
