@@ -13,7 +13,8 @@ import { JSDocCommentParser }    from './JSDocCommentParser.js';
 import { PostprocessDTS }        from './PostprocessDTS.js';
 
 /**
- * Provides a plugin for `esm-d-ts` to handle Svelte components.
+ * Provides a plugin for `esm-d-ts` to handle Svelte 4 components. Future support for Svelte 5 / mixed mode 4 & 5 is
+ * forthcoming.
  */
 export class DTSPluginSvelte
 {

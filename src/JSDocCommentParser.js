@@ -10,9 +10,8 @@ import ts                        from 'typescript';
  * To support comment blocks for the generated class declaration the first comment block with `@componentDescription`
  * is stored.
  *
- * Note: Due to a `prettier` bug; quite likely related to {@link https://github.com/prettier/prettier/issues/14564} the
- * prop comments are stored as raw text and {@link PostprocessDTS} will perform full text replacements instead of
- * working with structured `ts-morph` JSDoc comment manipulation.
+ * Note: All comments parsed are stored as raw text and {@link PostprocessDTS} will perform full text replacements
+ * instead of working with structured `ts-morph` JSDoc comment manipulation.
  */
 export class JSDocCommentParser
 {
@@ -40,7 +39,7 @@ export class JSDocCommentParser
    }
 
    /**
-    * Processes the script tag contents for JSDoc comments to preserve them across declaration generation.
+    * Processes the script tag contents for JSDoc comments to preserve across declaration generation.
     *
     * @param {string}   code - Svelte component script source code.
     *
@@ -50,8 +49,7 @@ export class JSDocCommentParser
     *
     * @param {import('@typhonjs-utils/logger-color').ColorLogger} logger - `esm-d-ts` logger instance.
     *
-    * @returns {ComponentJSDoc | undefined} Parsed JSDoc comment blocks for component description and exported props if
-    *          defined.
+    * @returns {ComponentJSDoc} Parsed JSDoc comment blocks for component description and exported props when defined.
     */
    static processScript(code, filepath, relativeFilepath, logger)
    {
@@ -114,7 +112,7 @@ export class JSDocCommentParser
          // At the initial depth store the last comment block; it may be undefined.
          if (depth === 0) { lastComment = jsdocComments.lastComment; }
 
-         // If a named declaration node is exported store the last comment block.
+         // If a named declaration node is exported store the prop name and any last comment block.
          if (isNamedDeclaration(node) && node.isExported())
          {
             const propName = node.getName();
