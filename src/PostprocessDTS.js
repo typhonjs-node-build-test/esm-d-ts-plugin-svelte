@@ -11,7 +11,7 @@ import ts            from 'typescript';
  * `export { default as <COMPONENT_NAME> } from './<COMPONENT_NAME>.svelte'` is utilized.
  *
  * JSDoc comments are also rejoined to the generated declaration for props and a component header comment that is
- * marked by the `@componentDescription` tag.
+ * marked by the `@componentDocumentation` tag.
  *
  * The rejoining of comments uses `replaceWithText` on declaration nodes instead of `addJsDoc` working with `ts-morph`
  * structures as both do a full replacement on the source file text.
@@ -58,9 +58,9 @@ export class PostprocessDTS
       classDeclaration.setIsExported(false);
       classDeclaration.setHasDeclareKeyword(true);
 
-      if (comments?.componentDescription)
+      if (comments?.componentDocumentation)
       {
-         classDeclaration.replaceWithText(`${comments.componentDescription}\n${classDeclaration.getText()}`);
+         classDeclaration.replaceWithText(`${comments.componentDocumentation}\n${classDeclaration.getText()}`);
       }
 
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
@@ -116,7 +116,25 @@ export class PostprocessDTS
       namespace.addJsDoc(
        { description: `Event / Prop / Slot type aliases for {@link ${className} | associated component}.` });
 
-      if (comments?.props?.size)
+      // Add types from `@type` tags in comments from props. ---------------------------------------------------------
+
+      if (comments?.propTypes?.size)
+      {
+         // Update all prop types in the associated namespace
+         const propTypeNode = propAlias.getTypeNode();
+         if (Node.isTypeElementMembered(propTypeNode))
+         {
+            for (const propertyNode of propTypeNode.getProperties())
+            {
+               const propertyName = propertyNode.getName();
+               if (comments.propTypes.has(propertyName)) { propertyNode.setType(comments.propTypes.get(propertyName)); }
+            }
+         }
+      }
+
+      // Add any prop comments. --------------------------------------------------------------------------------------
+
+      if (comments?.propComments?.size)
       {
          const propTypeNode = propAlias.getTypeNode();
 
@@ -125,9 +143,10 @@ export class PostprocessDTS
             for (const propertyNode of propTypeNode.getProperties())
             {
                const propertyName = propertyNode.getName();
-               if (comments.props.has(propertyName))
+               if (comments.propComments.has(propertyName))
                {
-                  propertyNode.replaceWithText(`\n${comments.props.get(propertyName)}\n${propertyNode.getText()}`);
+                  propertyNode.replaceWithText(
+                   `\n${comments.propComments.get(propertyName)}\n${propertyNode.getText()}`);
                }
             }
          }

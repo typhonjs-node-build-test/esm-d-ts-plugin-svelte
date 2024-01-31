@@ -1,13 +1,11 @@
 import { parseLeadingComments }  from '@typhonjs-build-test/esm-d-ts/transformer';
-import {
-   Node,
-   Project }                     from 'ts-morph';
+import { Node, Project }         from 'ts-morph';
 import ts                        from 'typescript';
 
 /**
  * Parses the script section of a Svelte component extracting JSDoc comments to rejoin with the generated declarations.
  *
- * To support comment blocks for the generated class declaration the first comment block with `@componentDescription`
+ * To support comment blocks for the generated class declaration the first comment block with `@componentDocumentation`
  * is stored.
  *
  * Note: All comments parsed are stored as raw text and {@link PostprocessDTS} will perform full text replacements
@@ -16,12 +14,12 @@ import ts                        from 'typescript';
 export class JSDocCommentParser
 {
    /**
-    * Finds any leading JSDoc comment block that includes `@componentDescription` tag.
+    * Finds any leading JSDoc comment block that includes `@componentDocumentation` tag.
     *
     * @param {import('@typhonjs-build-test/esm-d-ts/transformer').ParsedLeadingComments}   jsdocComments - All parsed
     * JSDoc comment blocks before a compiler node.
     *
-    * @returns {string[]} All raw JSDoc comment blocks with `@componentDescription` tag.
+    * @returns {string[]} All raw JSDoc comment blocks with `@componentDocumentation` tag.
     */
    static #parseComponentDescription(jsdocComments)
    {
@@ -29,7 +27,7 @@ export class JSDocCommentParser
 
       for (let i = 0; i < jsdocComments.parsed.length; i++)
       {
-         if (jsdocComments.parsed[i].tags.some((entry) => entry.tag === 'componentDescription'))
+         if (jsdocComments.parsed[i].tags.some((entry) => entry.tag === 'componentDocumentation'))
          {
             results.push(jsdocComments.comments[i]);
          }
@@ -66,13 +64,14 @@ export class JSDocCommentParser
       const tsSourceFile = sourceFile.compilerNode;
 
       const result = {
-         componentDescription: void 0,
-         props: new Map(),
-         propNames: new Set()
+         componentDocumentation: void 0,
+         propComments: new Map(),
+         propNames: new Set(),
+         propTypes: new Map()
       }
 
       const warnings = {
-         multipleComponentDescriptions: false
+         multipleComponentDocumentation: false
       }
 
       const isNamedDeclaration = (node) => Node.isClassDeclaration(node) || Node.isFunctionDeclaration(node) ||
@@ -81,6 +80,7 @@ export class JSDocCommentParser
       let depth = -1;
 
       let lastComment = void 0;
+      let lastParsed = void 0;
 
       const walk = (node) =>
       {
@@ -88,37 +88,54 @@ export class JSDocCommentParser
 
          const jsdocComments = parseLeadingComments(node.compilerNode, tsSourceFile);
 
-         const componentDescriptions = this.#parseComponentDescription(jsdocComments);
+         const componentDocumentation = this.#parseComponentDescription(jsdocComments);
 
-         // Assign the first encountered `@componentDescription` comment to the result. Check for multiple
-         // `@componentDescription` comments to produce a warning message.
-         if (componentDescriptions.length)
+         // Assign the first encountered `@componentDocumentation` comment to the result. Check for multiple
+         // `@componentDocumentation` comments to produce a warning message.
+         if (componentDocumentation.length)
          {
-            if (componentDescriptions.length > 1) { warnings.multipleComponentDescriptions = true; }
+            if (componentDocumentation.length > 1) { warnings.multipleComponentDocumentation = true; }
 
-            const firstComponentDescription = componentDescriptions[0];
+            const firstComponentDocumentation = componentDocumentation[0];
 
-            // Already have a `componentDescription` comment block parsed and a second non-matching one is found.
-            if (result.componentDescription && firstComponentDescription !== result.componentDescription)
+            // Already have a `componentDocumentation` comment block parsed and a second non-matching one is found.
+            if (result.componentDocumentation && firstComponentDocumentation !== result.componentDocumentation)
             {
-               warnings.multipleComponentDescriptions = true;
+               warnings.multipleComponentDocumentation = true;
             }
             else
             {
-               result.componentDescription = firstComponentDescription;
+               result.componentDocumentation = firstComponentDocumentation;
             }
          }
 
          // At the initial depth store the last comment block; it may be undefined.
-         if (depth === 0) { lastComment = jsdocComments.lastComment; }
+         if (depth === 0)
+         {
+            lastComment = jsdocComments.lastComment;
+            lastParsed = jsdocComments.lastParsed;
+         }
 
-         // If a named declaration node is exported store the prop name and any last comment block.
+         // If a named declaration node is exported store the prop name, any last comment block and types.
          if (isNamedDeclaration(node) && node.isExported())
          {
             const propName = node.getName();
 
             // Store comment for prop.
-            if (lastComment) { result.props.set(propName, lastComment); }
+            if (lastComment) { result.propComments.set(propName, lastComment); }
+
+            // Store any types defined in `@type` for prop. Only take the first parsed `@type` tag.
+            if (lastParsed)
+            {
+               for (const entry of lastParsed.tags)
+               {
+                  if (entry.tag === 'type' && typeof entry.type === 'string')
+                  {
+                     result.propTypes.set(propName, entry.type);
+                     break;
+                  }
+               }
+            }
 
             // Add to all prop names Set.
             result.propNames.add(propName)
@@ -133,9 +150,9 @@ export class JSDocCommentParser
       // Start iterating from the root node
       sourceFile.forEachChild(walk);
 
-      if (warnings.multipleComponentDescriptions)
+      if (warnings.multipleComponentDocumentation)
       {
-         logger.warn(`[plugin-svelte] Multiple '@componentDescription' JSDoc comment blocks detected in: ${
+         logger.warn(`[plugin-svelte] Multiple '@componentDocumentation' JSDoc comment blocks detected in: ${
           relativeFilepath}`);
       }
 
@@ -146,9 +163,11 @@ export class JSDocCommentParser
 /**
  * @typedef {object} ComponentJSDoc JSDoc comments for the component description and props.
  *
- * @property {string} componentDescription The first `@componentDescription` comment block.
+ * @property {string} componentDocumentation The first `@componentDocumentation` raw comment block.
  *
- * @property {Map<string, string>}  props Map of prop names to last leading comment block.
+ * @property {Map<string, string>}  propComments Map of prop names to last leading raw comment block.
+ *
+ * @property {Map<string, string>}  propTypes Map of prop names to @type tagged type.
  *
  * @property {Set<string>}  propNames A Set of all prop names regardless if they have comments or not.
  */
