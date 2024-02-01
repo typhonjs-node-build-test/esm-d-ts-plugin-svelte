@@ -6,7 +6,6 @@ import { isObject }              from '@typhonjs-utils/object';
 import { resolve }               from 'import-meta-resolve';
 import { compile }               from 'svelte/compiler';
 import { svelte2tsx }            from 'svelte2tsx';
-
 import upath                     from 'upath';
 
 import { JSDocCommentParser }    from './JSDocCommentParser.js';
@@ -64,13 +63,10 @@ export class DTSPluginSvelte
     * - `1005` - ',' expected.
     * - `2451` - redeclared block scope variable.
     *
-    * @param {object}   data - Data.
+    * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:diagnostic:filter']} data - Event data.
     *
-    * @param {import('typescript').Diagnostic}  data.diagnostic - Diagnostic to test.
-    *
-    * @param {Function}   data.diagnosticLog - Diagnostic logging helper.
-    *
-    * @returns {boolean} Filtered state.
+    * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['compile:diagnostic:filter']} Filtered
+    *          state.
     */
    compileDiagnosticFilter({ diagnostic, diagnosticLog })
    {
@@ -85,14 +81,7 @@ export class DTSPluginSvelte
    /**
     * Transform any Svelte files via `svelte2tsx` before TSC compilation.
     *
-    * @param {object}   data - Data.
-    *
-    * @param {import('@typhonjs-utils/logger-color').ColorLogger} data.logger - Logger instance.
-    *
-    * @param {Map<string, string>}  data.memoryFiles - Stores transformed code and temp paths.
-    *
-    * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - Processed config from
-    *        `esm-d-ts` that contains the filepaths being compiled.
+    * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:transform']} data - Event data.
     */
    compileTransform({ logger, memoryFiles, processedConfig })
    {
@@ -153,11 +142,10 @@ export class DTSPluginSvelte
    /**
     * Compiles the Svelte component returning the JS code so that `es-module-lexer` can parse it.
     *
-    * @param {object}   data - Data.
+    * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['lexer:transform']} data - Event data.
     *
-    * @param {string}   data.fileData - Svelte component file to compile / transform
-    *
-    * @returns {string} Compiled JS section of Svelte component.
+    * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['lexer:transform']} Compiled script / JS
+    *          section of Svelte component.
     */
    lexerTransform({ fileData })
    {
@@ -169,10 +157,7 @@ export class DTSPluginSvelte
     * Svelte v4 types will add a triple slash reference `/// <reference types="svelte" />` for generated types.
     * To remove it a regex is added to the `esm-d-ts` GenerateConfig -> `dtsReplace`.
     *
-    * @param {object}   data - Event data.
-    *
-    * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
-    *        configuration data.
+    * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['lifecycle:start']} data - Event data.
     */
    lifecycleStart({ processedConfig })
    {
@@ -194,13 +179,7 @@ export class DTSPluginSvelte
    /**
     * Handles postprocessing intermediate generated DTS files.
     *
-    * @param {object} data - Event data.
-    *
-    * @param {typeof import('@typhonjs-build-test/esm-d-ts/postprocess').PostProcess} data.PostProcess - Post process
-    *        manager from `esm-d-ts`.
-    *
-    * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
-    *        configuration data.
+    * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:end']} data - Event data.
     */
    async postprocessDTS({ PostProcess, processedConfig })
    {
