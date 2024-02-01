@@ -1,11 +1,9 @@
 import * as _typhonjs_plugin_manager from '@typhonjs-plugin/manager';
-import * as _typhonjs_build_test_esm_d_ts_postprocess from '@typhonjs-build-test/esm-d-ts/postprocess';
 import * as _typhonjs_build_test_esm_d_ts from '@typhonjs-build-test/esm-d-ts';
-import * as _typhonjs_utils_logger_color from '@typhonjs-utils/logger-color';
-import * as typescript from 'typescript';
 
 /**
- * Provides a plugin for `esm-d-ts` to handle Svelte components.
+ * Provides a plugin for `esm-d-ts` to handle Svelte 4 components. Future support for Svelte 5 / mixed mode 4 & 5 is
+ * forthcoming.
  */
 declare class DTSPluginSvelte {
   /**
@@ -17,80 +15,52 @@ declare class DTSPluginSvelte {
    * - `1005` - ',' expected.
    * - `2451` - redeclared block scope variable.
    *
-   * @param {object}   data - Data.
+   * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:diagnostic:filter']} data - Event data.
    *
-   * @param {import('typescript').Diagnostic}  data.diagnostic - Diagnostic to test.
-   *
-   * @param {Function}   data.diagnosticLog - Diagnostic logging helper.
-   *
-   * @returns {boolean} Filtered state.
+   * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['compile:diagnostic:filter']} Filtered
+   *          state.
    */
   compileDiagnosticFilter({
     diagnostic,
     diagnosticLog,
-  }: {
-    diagnostic: typescript.Diagnostic;
-    diagnosticLog: Function;
-  }): boolean;
+  }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['compile:diagnostic:filter']): _typhonjs_build_test_esm_d_ts.PluginEvent.Returns['compile:diagnostic:filter'];
   /**
    * Transform any Svelte files via `svelte2tsx` before TSC compilation.
    *
-   * @param {object}   data - Data.
-   *
-   * @param {import('@typhonjs-utils/logger-color').ColorLogger} data.logger - Logger instance.
-   *
-   * @param {Map<string, string>}  data.memoryFiles - Stores transformed code and temp paths.
-   *
-   * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - Processed config from
-   *        `esm-d-ts` that contains the filepaths being compiled.
+   * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:transform']} data - Event data.
    */
   compileTransform({
     logger,
     memoryFiles,
     processedConfig,
-  }: {
-    logger: _typhonjs_utils_logger_color.ColorLogger;
-    memoryFiles: Map<string, string>;
-    processedConfig: _typhonjs_build_test_esm_d_ts.ProcessedConfig;
-  }): void;
+  }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['compile:transform']): void;
   /**
    * Compiles the Svelte component returning the JS code so that `es-module-lexer` can parse it.
    *
-   * @param {object}   data - Data.
+   * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['lexer:transform']} data - Event data.
    *
-   * @param {string}   data.fileData - Svelte component file to compile / transform
-   *
-   * @returns {string} Compiled JS section of Svelte component.
+   * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['lexer:transform']} Compiled script / JS
+   *          section of Svelte component.
    */
-  lexerTransform({ fileData }: { fileData: string }): string;
+  lexerTransform({
+    fileData,
+  }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['lexer:transform']): _typhonjs_build_test_esm_d_ts.PluginEvent.Returns['lexer:transform'];
   /**
    * Svelte v4 types will add a triple slash reference `/// <reference types="svelte" />` for generated types.
    * To remove it a regex is added to the `esm-d-ts` GenerateConfig -> `dtsReplace`.
    *
-   * @param {object}   data - Event data.
-   *
-   * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
-   *        configuration data.
+   * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['lifecycle:start']} data - Event data.
    */
-  lifecycleStart({ processedConfig }: { processedConfig: _typhonjs_build_test_esm_d_ts.ProcessedConfig }): void;
+  lifecycleStart({ processedConfig }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['lifecycle:start']): void;
   /**
    * Handles postprocessing intermediate generated DTS files.
    *
-   * @param {object} data - Event data.
-   *
-   * @param {typeof import('@typhonjs-build-test/esm-d-ts/postprocess').PostProcess} data.PostProcess - Post process
-   *        manager from `esm-d-ts`.
-   *
-   * @param {import('@typhonjs-build-test/esm-d-ts').ProcessedConfig} data.processedConfig - `esm-d-ts` processed
-   *        configuration data.
+   * @param {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Data['compile:end']} data - Event data.
    */
   postprocessDTS({
     PostProcess,
     processedConfig,
-  }: {
-    PostProcess: typeof _typhonjs_build_test_esm_d_ts_postprocess.PostProcess;
-    processedConfig: _typhonjs_build_test_esm_d_ts.ProcessedConfig;
-  }): Promise<void>;
+  }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['compile:end']): Promise<void>;
   /**
    * @param {import('@typhonjs-plugin/manager').PluginInvokeEvent} ev -
    */
@@ -105,4 +75,4 @@ declare class DTSPluginSvelte {
  */
 declare const dtsPluginSvelte: DTSPluginSvelte;
 
-export { dtsPluginSvelte as default };
+export { DTSPluginSvelte, dtsPluginSvelte as default };
