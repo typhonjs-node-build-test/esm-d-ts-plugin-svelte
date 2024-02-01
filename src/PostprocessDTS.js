@@ -1,7 +1,5 @@
-import {
-   ClassDeclaration,
-   Node }            from 'ts-morph';
-import ts            from 'typescript';
+import { Node }   from 'ts-morph';
+import ts         from 'typescript';
 
 /**
  * Provides the postprocessing of the intermediate Svelte component declarations transforming the declaration format
@@ -46,7 +44,7 @@ export class PostprocessDTS
    {
       // Alter default exported class --------------------------------------------------------------------------------
 
-      /** @type {ClassDeclaration} */
+      /** @type {import('ts-morph').ClassDeclaration} */
       const classDeclaration = sourceFile.getDefaultExportSymbol()?.getDeclarations()?.[0];
       if (!classDeclaration)
       {
