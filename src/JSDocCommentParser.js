@@ -13,13 +13,16 @@ import ts                        from 'typescript';
  */
 export class JSDocCommentParser
 {
+   static #componentTags = new Set(['hidden', 'ignore', 'internal']);
+
    /**
     * Finds any leading JSDoc comment block that includes `@componentDocumentation` tag.
     *
     * @param {import('@typhonjs-build-test/esm-d-ts/transformer').ParsedLeadingComments}   jsdocComments - All parsed
     * JSDoc comment blocks before a compiler node.
     *
-    * @returns {string[]} All raw JSDoc comment blocks with `@componentDocumentation` tag.
+    * @returns {{ comments: string, tags: import('ts-morph').JSDocTagStructure[] }[]} All raw JSDoc comment blocks with
+    *          `@componentDocumentation` tag and additional tags to forward to generated namespace.
     */
    static #parseComponentDescription(jsdocComments)
    {
@@ -29,7 +32,18 @@ export class JSDocCommentParser
       {
          if (jsdocComments.parsed[i].tags.some((entry) => entry.tag === 'componentDocumentation'))
          {
-            results.push(jsdocComments.comments[i]);
+            const tags = [];
+
+            // Store any tags to forward to generated namespace.
+            for (const entry of jsdocComments.parsed[i].tags)
+            {
+               if (this.#componentTags.has(entry.tag)) { tags.push({ tagName: entry.tag }); }
+            }
+
+            results.push({
+               comments: jsdocComments.comments[i],
+               tags
+            });
          }
       }
 
@@ -63,8 +77,10 @@ export class JSDocCommentParser
       const sourceFile = project.createSourceFile('component.ts', code);
       const tsSourceFile = sourceFile.compilerNode;
 
+      /** @type {ComponentJSDoc} */
       const result = {
          componentDocumentation: void 0,
+         componentTags: [],
          propComments: new Map(),
          propNames: new Set(),
          propTypes: new Map()
@@ -99,13 +115,14 @@ export class JSDocCommentParser
             const firstComponentDocumentation = componentDocumentation[0];
 
             // Already have a `componentDocumentation` comment block parsed and a second non-matching one is found.
-            if (result.componentDocumentation && firstComponentDocumentation !== result.componentDocumentation)
+            if (result.componentDocumentation && firstComponentDocumentation.comments !== result.componentDocumentation)
             {
                warnings.multipleComponentDocumentation = true;
             }
             else
             {
-               result.componentDocumentation = firstComponentDocumentation;
+               result.componentDocumentation = firstComponentDocumentation.comments;
+               result.componentTags = firstComponentDocumentation.tags;
             }
          }
 
@@ -164,6 +181,9 @@ export class JSDocCommentParser
  * @typedef {object} ComponentJSDoc JSDoc comments for the component description and props.
  *
  * @property {string} componentDocumentation The first `@componentDocumentation` raw comment block.
+ *
+ * @property {import('ts-morph').JSDocTagStructure[]} componentTags Any tags to forward to generated namespace from
+ * component documentation comment block.
  *
  * @property {Map<string, string>}  propComments Map of prop names to last leading raw comment block.
  *

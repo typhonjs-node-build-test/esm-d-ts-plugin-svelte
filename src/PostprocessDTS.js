@@ -111,8 +111,10 @@ export class PostprocessDTS
       eventAlias.addJsDoc({ description: `Events type alias for {@link ${className} | associated component}.` });
       slotAlias.addJsDoc({ description: `Slots type alias for {@link ${className} | associated component}.` });
 
-      namespace.addJsDoc(
-       { description: `Event / Prop / Slot type aliases for {@link ${className} | associated component}.` });
+      namespace.addJsDoc({
+         description: `Event / Prop / Slot type aliases for {@link ${className} | associated component}.`,
+         tags: comments.componentTags
+      });
 
       // Add types from `@type` tags in comments from props. ---------------------------------------------------------
 
