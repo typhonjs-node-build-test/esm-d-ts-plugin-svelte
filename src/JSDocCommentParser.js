@@ -17,7 +17,7 @@ export class JSDocCommentParser
 {
    static #componentTags = new Set(['hidden', 'ignore', 'internal']);
 
-   static #removeTags = new Set(['componentDocumentation', 'property']);
+   static #removeTags = new Set(['componentDocumentation', 'param']);
 
    /**
     * Finds any leading JSDoc comment block that includes `@componentDocumentation` tag.
@@ -56,14 +56,14 @@ export class JSDocCommentParser
                const parsedTag = parsedTags[i];
                const tagName = parsedTag.tag;
 
-               // Pull out name / description / type from `@property` as data to attach to the `Events` type alias.
-               if (tagName === 'property')
+               // Pull out name / description / type from `@param` as data to attach to the `Events` type alias.
+               if (tagName === 'param')
                {
                   const name = parsedTag.name;
 
                   if (name === '')
                   {
-                     logger.warn(`[plugin-svelte] Skipping @property tag with no name in component documentation: ${
+                     logger.warn(`[plugin-svelte] Skipping @param tag with no name in component documentation: ${
                       relativeFilepath}`);
                      continue;
                   }
@@ -79,7 +79,7 @@ export class JSDocCommentParser
                   if (type === void 0 && comment === void 0)
                   {
                      logger.warn(
-                      `[plugin-svelte] Skipping @property tag with no type or description in component documentation: ${
+                      `[plugin-svelte] Skipping @param tag with no type or description in component documentation: ${
                         relativeFilepath}`);
                      continue;
                   }
