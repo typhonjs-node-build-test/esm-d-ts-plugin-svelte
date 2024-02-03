@@ -73,7 +73,8 @@ export class JSDocCommentParser
                   let comment;
                   if (parsedTag.description !== '')
                   {
-                     comment = `/**\n * ${parsedTag.description.replace(/\n/g, '\n * ')}\n */`;
+                     // Remove any leading white space and hyphen and replace newlines with proper JSDoc delimiter.
+                     comment = `/**\n * ${parsedTag.description.replace(/^[\s-]+/, '').replace(/\n/g, '\n * ')}\n */`;
                   }
 
                   if (type === void 0 && comment === void 0)
