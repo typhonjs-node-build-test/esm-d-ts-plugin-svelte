@@ -11,6 +11,9 @@ import ts         from 'typescript';
  * JSDoc comments are also rejoined to the generated declaration for props and a component header comment that is
  * marked by the `@componentDocumentation` tag.
  *
+ * For events types defined by `@param` in the component documentation comment block the type and any added description
+ * is replaced in the `Events` type alias. Warnings will be logged for specified event names that are not found.
+ *
  * The rejoining of comments uses `replaceWithText` on declaration nodes instead of `addJsDoc` working with `ts-morph`
  * structures as both do a full replacement on the source file text.
  */
@@ -120,6 +123,9 @@ export class PostprocessDTS
 
       if (comments?.componentEvents.size)
       {
+         // Store all event names to post warnings for ones that are not found in the declarations.
+         const remainingEventNames = new Set(comments.componentEvents.keys());
+
          const replaceElementMembered = (typeNode) =>
          {
             for (const propertyNode of typeNode.getProperties())
@@ -130,6 +136,9 @@ export class PostprocessDTS
                const cleanPropertyName = propertyName.replace(/^['"]|['"]$/g, '');
 
                if (!comments.componentEvents.has(cleanPropertyName)) { continue; }
+
+               // Remove event name from remaining set.
+               remainingEventNames.delete(cleanPropertyName);
 
                const eventData = comments.componentEvents.get(cleanPropertyName)
 
@@ -154,6 +163,15 @@ export class PostprocessDTS
          else if (Node.isTypeElementMembered(eventTypeNode))
          {
             replaceElementMembered(eventTypeNode);
+         }
+
+         if (remainingEventNames.size)
+         {
+            for (const eventName of remainingEventNames)
+            {
+               logger.warn(`[plugin-svelte] Event types substitution for event name '${eventName}' not found in: ${
+                comments.relativeFilepath}`);
+            }
          }
       }
 
