@@ -116,6 +116,47 @@ export class PostprocessDTS
          tags: comments.componentTags
       });
 
+      // Add comments & types from `@property` tags in comment documentation to events. ------------------------------
+
+      if (comments?.componentEvents.size)
+      {
+         const replaceElementMembered = (typeNode) =>
+         {
+            for (const propertyNode of typeNode.getProperties())
+            {
+               const propertyName = propertyNode.getName();
+
+               // Must strip any leading / trailing quotes.
+               const cleanPropertyName = propertyName.replace(/^['"]|['"]$/g, '');
+
+               if (!comments.componentEvents.has(cleanPropertyName)) { continue; }
+
+               const eventData = comments.componentEvents.get(cleanPropertyName)
+
+               if (typeof eventData.type === 'string') { propertyNode.setType(eventData.type); }
+
+               if (typeof eventData.comment === 'string')
+               {
+                  propertyNode.replaceWithText(`\n${eventData.comment}\n${propertyNode.getText()}`);
+               }
+            }
+         };
+
+         const eventTypeNode = eventAlias.getTypeNode();
+
+         if (Node.isIntersectionTypeNode(eventTypeNode))
+         {
+            for (const typeNode of eventTypeNode.getTypeNodes())
+            {
+               if (Node.isTypeElementMembered(typeNode)) { replaceElementMembered(typeNode); }
+            }
+         }
+         else if (Node.isTypeElementMembered(eventTypeNode))
+         {
+            replaceElementMembered(eventTypeNode);
+         }
+      }
+
       // Add types from `@type` tags in comments from props. ---------------------------------------------------------
 
       if (comments?.propTypes?.size)

@@ -1,6 +1,8 @@
 import { parseLeadingComments }  from '@typhonjs-build-test/esm-d-ts/transformer';
+import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
 import { Node, Project }         from 'ts-morph';
 import ts                        from 'typescript';
+
 
 /**
  * Parses the script section of a Svelte component extracting JSDoc comments to rejoin with the generated declarations.
@@ -15,16 +17,26 @@ export class JSDocCommentParser
 {
    static #componentTags = new Set(['hidden', 'ignore', 'internal']);
 
+   static #removeTags = new Set(['componentDocumentation', 'property']);
+
    /**
     * Finds any leading JSDoc comment block that includes `@componentDocumentation` tag.
     *
     * @param {import('@typhonjs-build-test/esm-d-ts/transformer').ParsedLeadingComments}   jsdocComments - All parsed
     * JSDoc comment blocks before a compiler node.
     *
-    * @returns {{ comments: string, tags: import('ts-morph').JSDocTagStructure[] }[]} All raw JSDoc comment blocks with
-    *          `@componentDocumentation` tag and additional tags to forward to generated namespace.
+    * @param {import('@typhonjs-utils/logger-color').ColorLogger} logger - `esm-d-ts` logger instance.
+    *
+    * @param {string}   relativeFilepath - Relative file path from compilation root directory.
+    *
+    * @returns {({
+    *    comment: string,
+    *    events: Map<string, { comment?: string, type?: string }>,
+    *    tags: import('ts-morph').JSDocTagStructure[] }[]
+    * )} All raw JSDoc comment blocks with `@componentDocumentation` tag and additional tags to forward to generated
+    *    namespace.
     */
-   static #parseComponentDescription(jsdocComments)
+   static #parseComponentDescription(jsdocComments, logger, relativeFilepath)
    {
       const results = [];
 
@@ -33,15 +45,56 @@ export class JSDocCommentParser
          if (jsdocComments.parsed[i].tags.some((entry) => entry.tag === 'componentDocumentation'))
          {
             const tags = [];
+            const events = new Map();
 
-            // Store any tags to forward to generated namespace.
-            for (const entry of jsdocComments.parsed[i].tags)
+            const parsed = new ESTreeParsedComment(jsdocComments.comments[i]);
+
+            const parsedTags = parsed.ast.tags;
+
+            for (let i = parsedTags.length; --i >= 0;)
             {
-               if (this.#componentTags.has(entry.tag)) { tags.push({ tagName: entry.tag }); }
+               const parsedTag = parsedTags[i];
+               const tagName = parsedTag.tag;
+
+               // Pull out name / description / type from `@property` as data to attach to the `Events` type alias.
+               if (tagName === 'property')
+               {
+                  const name = parsedTag.name;
+
+                  if (name === '')
+                  {
+                     logger.warn(`[plugin-svelte] Skipping @property tag with no name in component documentation: ${
+                      relativeFilepath}`);
+                     continue;
+                  }
+
+                  const type = parsedTag.rawType !== '' ? parsedTag.rawType : void 0;
+
+                  let comment;
+                  if (parsedTag.description !== '')
+                  {
+                     comment = `/**\n * ${parsedTag.description.replace(/\n/g, '\n * ')}\n */`;
+                  }
+
+                  if (type === void 0 && comment === void 0)
+                  {
+                     logger.warn(
+                      `[plugin-svelte] Skipping @property tag with no type or description in component documentation: ${
+                        relativeFilepath}`);
+                     continue;
+                  }
+
+                  events.set(name, { comment, type });
+               }
+               else if (this.#componentTags.has(tagName)) // Store any tags to forward to generated namespace.
+               {
+                  if (this.#componentTags.has(tagName)) { tags.push({ tagName }); }
+               }
             }
 
             results.push({
-               comments: jsdocComments.comments[i],
+               comment: parsed.removeTags(this.#removeTags).toString(),
+               events,
                tags
             });
          }
@@ -80,14 +133,12 @@ export class JSDocCommentParser
       /** @type {ComponentJSDoc} */
       const result = {
          componentDocumentation: void 0,
+         componentEvents: void 0,
          componentTags: [],
          propComments: new Map(),
          propNames: new Set(),
-         propTypes: new Map()
-      }
-
-      const warnings = {
-         multipleComponentDocumentation: false
+         propTypes: new Map(),
+         relativeFilepath
       }
 
       const isNamedDeclaration = (node) => Node.isClassDeclaration(node) || Node.isFunctionDeclaration(node) ||
@@ -104,25 +155,17 @@ export class JSDocCommentParser
 
          const jsdocComments = parseLeadingComments(node.compilerNode, tsSourceFile);
 
-         const componentDocumentation = this.#parseComponentDescription(jsdocComments);
-
-         // Assign the first encountered `@componentDocumentation` comment to the result. Check for multiple
-         // `@componentDocumentation` comments to produce a warning message.
-         if (componentDocumentation.length)
+         // Assign the first encountered `@componentDocumentation` comment to the result. Ignore any additional
+         // `@componentDocumentation` tagged comments.
+         if (result.componentDocumentation === void 0)
          {
-            if (componentDocumentation.length > 1) { warnings.multipleComponentDocumentation = true; }
+            const componentDocumentation = this.#parseComponentDescription(jsdocComments, logger, relativeFilepath);
 
-            const firstComponentDocumentation = componentDocumentation[0];
-
-            // Already have a `componentDocumentation` comment block parsed and a second non-matching one is found.
-            if (result.componentDocumentation && firstComponentDocumentation.comments !== result.componentDocumentation)
+            if (componentDocumentation.length)
             {
-               warnings.multipleComponentDocumentation = true;
-            }
-            else
-            {
-               result.componentDocumentation = firstComponentDocumentation.comments;
-               result.componentTags = firstComponentDocumentation.tags;
+               result.componentDocumentation = componentDocumentation[0].comment;
+               result.componentEvents = componentDocumentation[0].events;
+               result.componentTags = componentDocumentation[0].tags;
             }
          }
 
@@ -167,12 +210,6 @@ export class JSDocCommentParser
       // Start iterating from the root node
       sourceFile.forEachChild(walk);
 
-      if (warnings.multipleComponentDocumentation)
-      {
-         logger.warn(`[plugin-svelte] Multiple '@componentDocumentation' JSDoc comment blocks detected in: ${
-          relativeFilepath}`);
-      }
-
       return result;
    }
 }
@@ -180,7 +217,10 @@ export class JSDocCommentParser
 /**
  * @typedef {object} ComponentJSDoc JSDoc comments for the component description and props.
  *
- * @property {string} componentDocumentation The first `@componentDocumentation` raw comment block.
+ * @property {string} [componentDocumentation] The first `@componentDocumentation` raw comment block.
+ *
+ * @property {Map<string, { comment?: string, type?: string }>} [componentEvents] The component documentation
+ * parsed `@property` tags repurposed to describe custom events in the `Events` type alias.
  *
  * @property {import('ts-morph').JSDocTagStructure[]} componentTags Any tags to forward to generated namespace from
  * component documentation comment block.
@@ -190,4 +230,6 @@ export class JSDocCommentParser
  * @property {Map<string, string>}  propTypes Map of prop names to @type tagged type.
  *
  * @property {Set<string>}  propNames A Set of all prop names regardless if they have comments or not.
+ *
+ * @property {string}   relativeFilepath - Relative source file path.
  */
