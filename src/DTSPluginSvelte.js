@@ -183,7 +183,10 @@ export class DTSPluginSvelte
     */
    async postprocessDTS({ PostProcess, processedConfig })
    {
-      const { dtsDirectoryPath } = processedConfig;
+      const { dtsDirectoryPath, generateConfig } = processedConfig;
+
+      // No postprocessing when running `checkJs`.
+      if (generateConfig.tsCheckJs) { return; }
 
       const svelteDTSPaths = await getFileList({
          dir: dtsDirectoryPath,
