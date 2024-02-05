@@ -17,7 +17,7 @@ export class JSDocCommentParser
 {
    static #componentTags = new Set(['hidden', 'ignore', 'internal']);
 
-   static #removeTags = new Set(['componentDocumentation', 'param']);
+   static #removeTags = new Set(['componentDocumentation', 'implements', 'param']);
 
    /**
     * Finds any leading JSDoc comment block that includes `@componentDocumentation` tag.
@@ -32,6 +32,7 @@ export class JSDocCommentParser
     * @returns {({
     *    comment: string,
     *    events: Map<string, { comment?: string, type?: string }>,
+    *    interfaces: Set<string>
     *    tags: import('ts-morph').JSDocTagStructure[] }[]
     * )} All raw JSDoc comment blocks with `@componentDocumentation` tag and additional tags to forward to generated
     *    namespace.
@@ -44,8 +45,9 @@ export class JSDocCommentParser
       {
          if (jsdocComments.parsed[i].tags.some((entry) => entry.tag === 'componentDocumentation'))
          {
-            const tags = [];
             const events = new Map();
+            const interfaces = new Set();
+            const tags = [];
 
             const parsed = new ESTreeParsedComment(jsdocComments.comments[i]);
 
@@ -55,6 +57,18 @@ export class JSDocCommentParser
             {
                const parsedTag = parsedTags[i];
                const tagName = parsedTag.tag;
+
+               // Store the type specified to be added as an interface to the Svelte component.
+               if (tagName === 'implements')
+               {
+                  if (interfaces.has(parsedTag.rawType))
+                  {
+                     logger.warn(`[plugin-svelte] Duplicated '@implements' tags for \`${
+                      parsedTag.rawType}\` in component documentation: ${relativeFilepath}`);
+                  }
+
+                  interfaces.add(parsedTag.rawType);
+               }
 
                // Pull out name / description / type from `@param` as data to attach to the `Events` type alias.
                if (tagName === 'param')
@@ -96,6 +110,7 @@ export class JSDocCommentParser
             results.push({
                comment: parsed.removeTags(this.#removeTags).toString(),
                events,
+               interfaces,
                tags
             });
          }
@@ -166,6 +181,7 @@ export class JSDocCommentParser
             {
                result.componentDocumentation = componentDocumentation[0].comment;
                result.componentEvents = componentDocumentation[0].events;
+               result.componentInterfaces = componentDocumentation[0].interfaces;
                result.componentTags = componentDocumentation[0].tags;
             }
          }
@@ -222,6 +238,8 @@ export class JSDocCommentParser
  *
  * @property {Map<string, { comment?: string, type?: string }>} [componentEvents] The component documentation
  * parsed `@property` tags repurposed to describe custom events in the `Events` type alias.
+ *
+ * @property {Set<string>} componentInterfaces - Types defined by @implements in component documentation.
  *
  * @property {import('ts-morph').JSDocTagStructure[]} componentTags Any tags to forward to generated namespace from
  * component documentation comment block.

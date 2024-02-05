@@ -1,5 +1,6 @@
-import { Node }   from 'ts-morph';
-import ts         from 'typescript';
+import { parseImportType } from '@typhonjs-build-test/esm-d-ts/util';
+import { Node }            from 'ts-morph';
+import ts                  from 'typescript';
 
 /**
  * Provides the postprocessing of the intermediate Svelte component declarations transforming the declaration format
@@ -73,6 +74,7 @@ export class PostprocessDTS
 
       const svelteComponentTypeArgs = heritageClause.getTypeNodes()[0];
 
+      // Rewrite SvelteComponent templated types with the namespaced types generated below.
       if (svelteComponentTypeArgs && Node.isExpressionWithTypeArguments(svelteComponentTypeArgs))
       {
          const typeArguments = svelteComponentTypeArgs.getTypeArguments();
@@ -82,6 +84,53 @@ export class PostprocessDTS
             typeArguments[0].replaceWithText(`${className}.Props`);
             typeArguments[1].replaceWithText(`${className}.Events`);
             typeArguments[2].replaceWithText(`${className}.Slots`);
+         }
+      }
+
+      // Add any interfaces as defined by `@implements` tags in component documentation. -----------------------------
+
+      if (comments?.componentInterfaces.size)
+      {
+         /**
+          * Stores the identifier strings for synthetic import declaration generation from `@implements` tags. In the
+          * post. The imports are grouped by import module path.
+          *
+          * @type {Map<string, Set<string>>}
+          */
+         const importIdents = new Map();
+
+         for (const entry of comments.componentInterfaces)
+         {
+            // Parse any import types statement.
+            const result = parseImportType(entry);
+
+            if (result)
+            {
+               // Add the imported identifier to the module Map.
+               if (importIdents.has(result.module)) { importIdents.get(result.module).add(result.identImport); }
+               else { importIdents.set(result.module, new Set([result.identImport])); }
+
+               classDeclaration.addImplements(result.identFull);
+            }
+            else
+            {
+               classDeclaration.addImplements(entry);
+            }
+         }
+
+         // Synthetically add any import types as actual imports in source file.
+         if (importIdents.size)
+         {
+            for (const module of [...importIdents.keys()].sort())
+            {
+               const idents = [...importIdents.get(module)].sort();
+
+               sourceFile.addImportDeclaration({
+                  isTypeOnly: true,
+                  namedImports: idents,
+                  moduleSpecifier: module
+               })
+            }
          }
       }
 
