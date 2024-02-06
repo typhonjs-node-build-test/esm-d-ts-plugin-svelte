@@ -89,7 +89,7 @@ export class PostprocessDTS
 
       // Add any interfaces as defined by `@implements` tags in component documentation. -----------------------------
 
-      if (comments?.componentInterfaces.size)
+      if (comments?.componentInterfaces?.size)
       {
          /**
           * Stores the identifier strings for synthetic import declaration generation from `@implements` tags. In the
@@ -170,7 +170,7 @@ export class PostprocessDTS
 
       // Add comments & types from `@property` tags in comment documentation to events. ------------------------------
 
-      if (comments?.componentEvents.size)
+      if (comments?.componentEvents?.size)
       {
          // Store all event names to post warnings for ones that are not found in the declarations.
          const remainingEventNames = new Set(comments.componentEvents.keys());
