@@ -75,4 +75,4 @@ declare class DTSPluginSvelte {
  */
 declare const dtsPluginSvelte: DTSPluginSvelte;
 
-export { DTSPluginSvelte, dtsPluginSvelte as default };
+export { dtsPluginSvelte as default };
