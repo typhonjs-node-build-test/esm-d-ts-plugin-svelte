@@ -32,6 +32,13 @@ export class DTSPluginSvelte
    static #regexScriptIsTS = /<script\s+[^>]*?lang=['"](ts|typescript)['"]/;
 
    /**
+    * Replace script contents after JSDoc processing.
+    *
+    * @type {RegExp}
+    */
+   static #regexScriptReplace = /(<script\b[^>]*>)([\s\S]*?)(<\/script>)/;
+
+   /**
     * Detects an intermediate DTS Svelte filename extension.
     *
     * @type {RegExp}
@@ -43,7 +50,7 @@ export class DTSPluginSvelte
     *
     * @type {RegExp}
     */
-   static #regexTypedef = /\/\*\*[\s\S]*?@typedef[\s\S]*?__propDef[\s\S]*?\*\/\s*/g;
+   static #regexTypedef = /\/\*\*\s*?@typedef[\s\S]*?__propDef[\s\S]*?\*\/\s*/g;
 
    /**
     * Stores the relative intermediate declaration Svelte file path to parsed component JSDoc.
@@ -102,20 +109,9 @@ export class DTSPluginSvelte
 
             // Any exceptions raised are caught by `esm-d-ts`.
 
-            const code = fs.readFileSync(filepath, 'utf-8').toString();
+            let code = fs.readFileSync(filepath, 'utf-8').toString();
             const isTsFile = DTSPluginSvelte.#regexScriptIsTS.test(code);
-
             const tempPath = `${filepath}${isTsFile ? '.ts' : '.js'}`;
-
-            const tsx = svelte2tsx(code, {
-               filename: filepath,
-               isTsFile,
-               mode: 'dts',
-               noSvelteComponentTyped: true
-            });
-
-            memoryFiles.set(tempPath, tsx.code);
-            compileFilepaths[cntr] = tempPath;
 
             // Process script contents for JSDoc comments.
             const match = DTSPluginSvelte.#regexScriptContent.exec(code);
@@ -126,16 +122,33 @@ export class DTSPluginSvelte
 
                if (jsdocResult)
                {
+                  // Replace the script contents with the processed script after JSDoc processing the
+                  // `@componentDocumentation` tagged JSDoc comment block has been sanitized. This is done so that
+                  // running TSC via `checkJs` does not have spurious warnings.
+                  code = code.replace(DTSPluginSvelte.#regexScriptReplace, `$1${jsdocResult.scriptCode}$3`);
+
                   this.#componentComments.set(`${relativeFilepath}.d.ts`, jsdocResult);
                }
             }
+
+            const tsx = svelte2tsx(code, {
+               filename: filepath,
+               isTsFile,
+               mode: 'dts',
+               noSvelteComponentTyped: true
+            });
+
+            memoryFiles.set(tempPath, tsx.code);
+            compileFilepaths[cntr] = tempPath;
          }
       }
 
       if (hasSvelte)
       {
-         const svelteShims = fileURLToPath(resolve('svelte2tsx/svelte-shims-v4.d.ts', import.meta.url));
-         compileFilepaths.push(upath.toUnix(svelteShims));
+         compileFilepaths.push(upath.toUnix(fileURLToPath(resolve('svelte2tsx/svelte-jsx-v4.d.ts', import.meta.url))));
+
+         compileFilepaths.push(upath.toUnix(fileURLToPath(resolve('svelte2tsx/svelte-shims-v4.d.ts',
+          import.meta.url))));
       }
    }
 

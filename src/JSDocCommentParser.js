@@ -150,11 +150,13 @@ export class JSDocCommentParser
       const result = {
          componentDocumentation: void 0,
          componentEvents: void 0,
+         componentInterfaces: void 0,
          componentTags: [],
          propComments: new Map(),
          propNames: new Set(),
          propTypes: new Map(),
-         relativeFilepath
+         relativeFilepath,
+         scriptCode: void 0
       }
 
       const isNamedDeclaration = (node) => Node.isClassDeclaration(node) || Node.isFunctionDeclaration(node) ||
@@ -183,6 +185,9 @@ export class JSDocCommentParser
                result.componentEvents = componentDocumentation[0].events;
                result.componentInterfaces = componentDocumentation[0].interfaces;
                result.componentTags = componentDocumentation[0].tags;
+
+               // Replace the source node JSDoc with processed component documentation JSDoc.
+               node.replaceWithText(`${result.componentDocumentation}\n${node.getText()}`);
             }
          }
 
@@ -227,6 +232,8 @@ export class JSDocCommentParser
       // Start iterating from the root node
       sourceFile.forEachChild(walk);
 
+      result.scriptCode = sourceFile.getFullText();
+
       return result;
    }
 }
@@ -251,4 +258,6 @@ export class JSDocCommentParser
  * @property {Set<string>}  propNames A Set of all prop names regardless if they have comments or not.
  *
  * @property {string}   relativeFilepath - Relative source file path.
+ *
+ * @property {string}   scriptCode The modified script source code after AST processing.
  */
