@@ -3,7 +3,6 @@ import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
 import { Node, Project }         from 'ts-morph';
 import ts                        from 'typescript';
 
-
 /**
  * Parses the script section of a Svelte component extracting JSDoc comments to rejoin with the generated declarations.
  *
@@ -15,8 +14,18 @@ import ts                        from 'typescript';
  */
 export class JSDocCommentParser
 {
+   /**
+    * These JSDoc tags are forwarded onto the generated namespace.
+    *
+    * @type {Set<string>}
+    */
    static #componentTags = new Set(['hidden', 'ignore', 'internal']);
 
+   /**
+    * These JSDoc tags are processed in the `@componentDocumentation` tagged comment block and subsequently removed.
+    *
+    * @type {Set<string>}
+    */
    static #removeTags = new Set(['componentDocumentation', 'implements', 'param']);
 
    /**
