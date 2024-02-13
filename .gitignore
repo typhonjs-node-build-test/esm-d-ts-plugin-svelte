@@ -7,6 +7,7 @@ npm-debug.log
 /node_modules
 /dist
 /env
-/.nyc_output
 /coverage
-/test/output
+/html
+/test/fixture/output
+package-lock.json
