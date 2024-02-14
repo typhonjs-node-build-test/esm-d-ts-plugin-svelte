@@ -1,0 +1,14 @@
+[
+  [
+    "\u001b[32m[esm-d-ts] Checking DTS bundle for: ./test/fixture/src/javascript/warnings/index.js\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Duplicated '@implements' tags for `import('./types').ITest` in component documentation: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Skipping @param tag with no name in component documentation: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Skipping @param tag with no type or description in component documentation: Warnings.svelte\u001b[0m"
+  ]
+]

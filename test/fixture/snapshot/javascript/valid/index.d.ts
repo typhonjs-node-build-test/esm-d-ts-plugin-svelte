@@ -1,6 +1,10 @@
 import { SvelteComponent } from 'svelte';
 
+/**
+ * A test interface.
+ */
 declare interface ITest {
+  /** Implementing component must have `foo` getter. */
   get foo(): () => void;
 }
 
@@ -8,11 +12,7 @@ declare interface ITest {
  * A test header that is long and has
  * several lines with a bunch of extra data.
  *
- *
- *
  * @hidden
- * @hidden
- *
  */
 declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, TjsTest.Slots> implements ITest {
   /** Getter for {@link TjsTest.Props.foo | foo} prop. */
@@ -24,7 +24,6 @@ declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, Tjs
 
 /**
  * Event / Prop / Slot type aliases for {@link TjsTest | associated component}.
- * @hidden
  * @hidden
  */
 declare namespace TjsTest {
@@ -38,7 +37,6 @@ declare namespace TjsTest {
      * and stuff
      *
      * and some more text
-     *
      */
     'test:thing': CustomEvent<{ test: boolean }>;
     /**

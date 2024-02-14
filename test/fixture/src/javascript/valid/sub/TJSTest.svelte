@@ -4,13 +4,6 @@
     * A test header that is long and has
     * several lines with a bunch of extra data.
     *
-    *
-    *
-    * @componentDocumentation
-    *
-    * @hidden
-    * @hidden
-    *
     * @implements {(import('../types').ITest)} Some test interface
     *
     * @param {CustomEvent<import('..').TestEvent>} test:foo:bar - A foo-bar event.
@@ -18,10 +11,9 @@
     * and stuff
     *
     * and some more text
-    *
+    * @hidden
+    * @componentDocumentation
     */
-
-   // import { jsFunction } from './jsCode.js';
 
    import { createEventDispatcher } from 'svelte';
 

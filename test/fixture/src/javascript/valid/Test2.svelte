@@ -2,6 +2,8 @@
 <script>
    /**
     * A test header
+    *
+    * @componentDocumentation
     */
 
    /**

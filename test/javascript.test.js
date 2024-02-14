@@ -1,23 +1,73 @@
-import { generateDTS }  from '@typhonjs-build-test/esm-d-ts';
+import {
+   beforeAll,
+   expect,
+   vi }           from 'vitest';
 
-import fs               from 'fs-extra';
+import {
+   checkDTS,
+   generateDTS }  from '@typhonjs-build-test/esm-d-ts';
+
+import fs         from 'fs-extra';
 
 describe('Components (javascript)', () =>
 {
-   it('generateDTS', async () =>
+   beforeAll(() =>
    {
       fs.ensureDirSync('./test/fixture/output/javascript');
       fs.emptyDirSync('./test/fixture/output/javascript');
+   });
 
-      await generateDTS({
-         input: './test/fixture/src/javascript/index.js',
-         output: './test/fixture/output/javascript/index.d.ts',
-         logLevel: 'debug',
-         plugins: ['./src/index.js']
+   describe('valid', () =>
+   {
+      it('checkDTS', async () =>
+      {
+         const consoleLog = [];
+         vi.spyOn(console, 'log').mockImplementation((...args) => consoleLog.push(args));
+
+         await checkDTS({
+            input: './test/fixture/src/javascript/valid/index.js',
+            logLevel: 'debug',
+            plugins: ['./src/index.js']
+         });
+
+         vi.restoreAllMocks();
+
+         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+          './fixture/snapshot/javascript/valid/checkDTS-console-log.json');
       });
 
-      const result = fs.readFileSync('./test/fixture/output/javascript/index.d.ts', 'utf-8');
+      it('generateDTS', async () =>
+      {
+         await generateDTS({
+            input: './test/fixture/src/javascript/valid/index.js',
+            output: './test/fixture/output/javascript/valid/index.d.ts',
+            logLevel: 'debug',
+            plugins: ['./src/index.js']
+         });
 
-      expect(result).toMatchFileSnapshot('./fixture/snapshot/javascript/index.d.ts');
+         const result = fs.readFileSync('./test/fixture/output/javascript/valid/index.d.ts', 'utf-8');
+
+         expect(result).toMatchFileSnapshot('./fixture/snapshot/javascript/valid/index.d.ts');
+      });
+   });
+
+   describe('warnings', () =>
+   {
+      it('checkDTS', async () =>
+      {
+         const consoleLog = [];
+         vi.spyOn(console, 'log').mockImplementation((...args) => consoleLog.push(args));
+
+         await checkDTS({
+            input: './test/fixture/src/javascript/warnings/index.js',
+            logLevel: 'debug',
+            plugins: ['./src/index.js']
+         });
+
+         vi.restoreAllMocks();
+
+         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+          './fixture/snapshot/javascript/warnings/checkDTS-console-log.json');
+      });
    });
 });

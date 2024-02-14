@@ -2,7 +2,7 @@
    /**
     * A test header
     *
-    * @component
+    * @componentDocumentation
     */
 
    import TestChild from './TestChild.svelte';
