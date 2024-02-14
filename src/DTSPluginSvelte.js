@@ -77,6 +77,7 @@ export class DTSPluginSvelte
     */
    compileDiagnosticFilter({ diagnostic, diagnosticLog })
    {
+      /* v8 ignore next 6 */
       if (DTSPluginSvelte.#regexSvelteFile.test(diagnostic?.file?.fileName) &&
        (diagnostic.code === 1005 || diagnostic.code === 2451))
       {
@@ -176,6 +177,7 @@ export class DTSPluginSvelte
    {
       const { generateConfig } = processedConfig;
 
+      /* v8 ignore next 4 */
       if (isObject(generateConfig?.dtsReplace))
       {
          generateConfig.dtsReplace['/\\/\\/ <reference.*\\/>'] = '';

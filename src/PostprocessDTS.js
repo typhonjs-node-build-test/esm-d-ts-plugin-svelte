@@ -48,6 +48,7 @@ export class PostprocessDTS
    {
       // Alter default exported class --------------------------------------------------------------------------------
 
+      /* v8 ignore next 6 */
       /** @type {import('ts-morph').ClassDeclaration} */
       const classDeclaration = sourceFile.getDefaultExportSymbol()?.getDeclarations()?.[0];
       if (!classDeclaration)
@@ -65,6 +66,7 @@ export class PostprocessDTS
          classDeclaration.replaceWithText(`${comments.componentDocumentation}\n${classDeclaration.getText()}`);
       }
 
+      /* v8 ignore next 6 */
       const heritageClause = classDeclaration.getHeritageClauseByKind(ts.SyntaxKind.ExtendsKeyword);
       if (!heritageClause)
       {
@@ -136,6 +138,7 @@ export class PostprocessDTS
 
       // Extract type alias definitions from `__propDef` variable ----------------------------------------------------
 
+      /* v8 ignore next 5 */
       const propDef = sourceFile.getVariableDeclaration('__propDef');
       if (!propDef)
       {
