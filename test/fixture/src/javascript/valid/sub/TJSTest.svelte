@@ -58,5 +58,5 @@
      on:keydown
      on:test:thing
 >
-   {thing2}
+   {thing}
 </div>
