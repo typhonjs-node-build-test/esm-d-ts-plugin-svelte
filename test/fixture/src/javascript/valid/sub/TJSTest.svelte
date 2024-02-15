@@ -25,7 +25,14 @@
     *
     * @type {string}
     */
-   export let thing2 = void 0;
+   export let thing = void 0;
+
+   /**
+    * Test for import types.
+    *
+    * @type {import('../types').TypeAlias}
+    */
+   export let importType = void 0;
 
    /**
     * Something foo
