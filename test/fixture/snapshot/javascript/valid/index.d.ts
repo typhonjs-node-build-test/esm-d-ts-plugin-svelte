@@ -7,6 +7,15 @@ declare interface ITest {
   /** Implementing component must have `foo` getter. */
   get foo(): () => void;
 }
+/**
+ * A test type alias.
+ */
+type TypeAlias = {
+  /**
+   * Some bar parameter.
+   */
+  bar?: boolean;
+};
 
 /**
  * A test header that is long and has
@@ -28,7 +37,28 @@ declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, Tjs
  */
 declare namespace TjsTest {
   /** Props type alias for {@link TjsTest | associated component}. */
-  export type Props = { thing2?: string; foo?: () => void; bar?: () => void };
+  export type Props = {
+    /**
+     * Some info that has data over several
+     * lines.
+     *
+     * Because
+     *
+     * @type {string}
+     */
+    thing?: string;
+    /**
+     * Test for import types.
+     *
+     * @type {import('../types').TypeAlias}
+     */
+    importType?: TypeAlias;
+    /**
+     * Something foo
+     */
+    foo?: () => void;
+    bar?: () => void;
+  };
   /** Events type alias for {@link TjsTest | associated component}. */
   export type Events = {
     keydown: KeyboardEvent;
@@ -66,4 +96,4 @@ type TestEvent = {
   foo: boolean;
 };
 
-export { type ITest, JSClass, TjsTest as TJSTest, type TestEvent, jsFunction };
+export { type ITest, JSClass, TjsTest as TJSTest, type TestEvent, type TypeAlias, jsFunction };
