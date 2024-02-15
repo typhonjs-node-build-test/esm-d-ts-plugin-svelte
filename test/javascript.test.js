@@ -42,6 +42,7 @@ describe('Components (javascript)', () =>
             input: './test/fixture/src/javascript/valid/index.js',
             output: './test/fixture/output/javascript/valid/index.d.ts',
             logLevel: 'debug',
+            compilerOptions: { outDir: './test/fixture/output/javascript/valid/.dts' },
             plugins: ['./src/index.js']
          });
 
@@ -68,6 +69,25 @@ describe('Components (javascript)', () =>
 
          expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
           './fixture/snapshot/javascript/warnings/checkDTS-console-log.json');
+      });
+
+      it('generateDTS', async () =>
+      {
+         const consoleLog = [];
+         vi.spyOn(console, 'log').mockImplementation((...args) => consoleLog.push(args));
+
+         await generateDTS({
+            input: './test/fixture/src/javascript/warnings/index.js',
+            output: './test/fixture/output/javascript/warnings/index.d.ts',
+            logLevel: 'debug',
+            compilerOptions: { outDir: './test/fixture/output/javascript/warnings/.dts' },
+            plugins: ['./src/index.js']
+         });
+
+         vi.restoreAllMocks();
+
+         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+          './fixture/snapshot/javascript/warnings/generateDTS-console-log.json');
       });
    });
 });
