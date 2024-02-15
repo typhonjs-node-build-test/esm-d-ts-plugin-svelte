@@ -268,7 +268,7 @@ export class PostprocessDTS
       const typeAliases = sourceFile.getTypeAliases();
       for (const typeAlias of typeAliases) { typeAlias.remove(); }
 
-      // Add comments to all accessors linking them to the props type alias / definition. ----------------------------
+      // Add types / comments to all accessors linking them to the props type alias / definition. --------------------
 
       if (comments?.propNames?.size)
       {
@@ -276,8 +276,14 @@ export class PostprocessDTS
          for (const accessorGet of accessorsGet)
          {
             const propName = accessorGet.getName();
-            if (comments.propNames.has(propName))
+
+            if (comments.propTypes.has(propName))
             {
+               // Add return type.
+               const returnType = comments.propTypes.get(propName);
+               if (returnType && returnType !== 'any') { accessorGet.setReturnType(returnType); }
+
+               // Add comment linking `Props` namespace.
                const newComment = `/** Getter for {@link ${className}.Props.${propName} | ${propName}} prop. */`;
                accessorGet.replaceWithText(`\n${newComment}\n${accessorGet.getText()}`);
             }
@@ -289,6 +295,11 @@ export class PostprocessDTS
             const propName = accessorSet.getName();
             if (comments.propNames.has(propName))
             {
+               // Add argument type.
+               const argType = comments.propTypes.get(propName);
+               if (argType && argType !== 'any') { accessorSet.getParameters()?.[0]?.setType(argType); }
+
+               // Add comment linking `Props` namespace.
                const newComment = `/** Setter for {@link ${className}.Props.${propName} | ${propName}} prop. */`;
                accessorSet.replaceWithText(`\n${newComment}\n${accessorSet.getText()}`);
             }
