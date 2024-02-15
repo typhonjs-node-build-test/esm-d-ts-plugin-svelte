@@ -1,7 +1,9 @@
-import { parseLeadingComments }  from '@typhonjs-build-test/esm-d-ts/transformer';
-import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
+import { parseLeadingComments }  from '@typhonjs-build-test/esm-d-ts/util';
+// import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
 import { Node, Project }         from 'ts-morph';
 import ts                        from 'typescript';
+
+import { ESTreeParsedComment }   from "./ESTreeParsedComment.js";
 
 /**
  * Parses the script section of a Svelte component extracting JSDoc comments to rejoin with the generated declarations.
@@ -153,7 +155,6 @@ export class JSDocCommentParser
 
       // Add the script contents to a virtual project.
       const sourceFile = project.createSourceFile('component.ts', code);
-      const tsSourceFile = sourceFile.compilerNode;
 
       /** @type {ComponentJSDoc} */
       const result = {
@@ -168,6 +169,11 @@ export class JSDocCommentParser
          scriptCode: void 0
       }
 
+      /**
+       * @param node - Named node to capture for prop processing.
+       *
+       * @returns {boolean} Is a named declaration.
+       */
       const isNamedDeclaration = (node) => Node.isClassDeclaration(node) || Node.isFunctionDeclaration(node) ||
        Node.isVariableDeclaration(node);
 
@@ -176,11 +182,14 @@ export class JSDocCommentParser
       let lastComment = void 0;
       let lastParsed = void 0;
 
+      /**
+       * @param {import('ts-morph').Node<ts.Node>} node -
+       */
       const walk = (node) =>
       {
          depth++;
 
-         const jsdocComments = parseLeadingComments(node.compilerNode, tsSourceFile);
+         const jsdocComments = parseLeadingComments(node.compilerNode, sourceFile);
 
          // Assign the first encountered `@componentDocumentation` comment to the result. Ignore any additional
          // `@componentDocumentation` tagged comments.
