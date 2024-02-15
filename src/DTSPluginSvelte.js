@@ -75,13 +75,26 @@ export class DTSPluginSvelte
     * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['compile:diagnostic:filter']} Filtered
     *          state.
     */
-   compileDiagnosticFilter({ diagnostic, diagnosticLog })
+   compileDiagnosticFilter({ diagnostic, diagnosticLog, message })
    {
+      // Move logging for the following diagnostic codes to the `debug` log level.
       /* v8 ignore next 6 */
       if (DTSPluginSvelte.#regexSvelteFile.test(diagnostic?.file?.fileName) &&
        (diagnostic.code === 1005 || diagnostic.code === 2451))
       {
          diagnosticLog(diagnostic, 'debug');
+         return true;
+      }
+
+      // Ignore the following codes / message strings.
+
+      // Currently `svelte2tsx` does not include a definition / declaration for `__sveltets_createSlot` in DTS mode.
+      if (diagnostic.code === 2304 && message.startsWith(`Cannot find name '__sveltets_createSlot'`)) { return true; }
+
+      // Currently `svelte2tsx` when exporting a function prop and `svelte:options` accessors is true an unknown
+      // `undefined` accessor pair is added to the declarations.
+      if (diagnostic.code === 2339 && message.startsWith(`Property 'undefined' does not exist on type '{`))
+      {
          return true;
       }
    }
