@@ -6,8 +6,7 @@
     * @implements {(import('../types').ITest)} Some test interface
     * @implements {(import('../types').ITest2)} Some test interface
     *
-    * @param {CustomEvent<import('..').TestEvent>} test:foo:bar - A foo-bar event.
-    * @param {CustomEvent<{ test: boolean }>} test:thing - Yo This is multi-line
+    * @param {CustomEvent<import('..').TestEvent>} test:foo:bar - Yo This is multi-line
     * and stuff
     *
     * and some more text
@@ -50,13 +49,12 @@
    {
       divEl.dispatchEvent(new CustomEvent('test:thing', { bubbles: true, cancelable: true }));
 
-      dispatch('test:foo:bar');
+      dispatch('test:foo:bar', { bar: true });
    }
 </script>
 
 <div bind:this={divEl}
      on:keydown
-     on:test:thing
 >
    {thing}
 </div>
