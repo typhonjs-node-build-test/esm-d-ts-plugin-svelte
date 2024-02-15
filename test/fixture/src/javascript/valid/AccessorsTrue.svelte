@@ -1,11 +1,10 @@
+<svelte:options accessors={true}/>
 <script>
    /**
-    * A test header
+    * A test for `svelte:options` accessors.
     *
     * @componentDocumentation
     */
-
-   import TestChild from './TestChild.svelte';
 
    /**
     * Some info
@@ -15,10 +14,15 @@
    export let thing = void 0;
 
    /**
+    * Test import types for accessors.
+    *
+    * @type {import('./types').TypeAlias}
+    */
+   export let typeAlias = void 0;
+
+   /**
     * @param {boolean} bar -
     */
    export function foo(bar) {}
 </script>
-
-<TestChild />
 <slot>{thing}</slot>

@@ -1,10 +1,10 @@
-<!-- Test Comment -->
 <script>
    /**
     * A test header that is long and has
     * several lines with a bunch of extra data.
     *
     * @implements {(import('../types').ITest)} Some test interface
+    * @implements {(import('../types').ITest2)} Some test interface
     *
     * @param {CustomEvent<import('..').TestEvent>} test:foo:bar - A foo-bar event.
     * @param {CustomEvent<{ test: boolean }>} test:thing - Yo This is multi-line

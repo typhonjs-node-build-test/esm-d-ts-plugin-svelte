@@ -4,6 +4,7 @@
     *
     * @param nameNoTypeOrDescription
     * @param {{noParamName: boolean}}
+    * @param {CustomEvent<{ foo: boolean }>} unusedEvent - An unused event.
     *
     * @implements {import('./types').ITest}
     * @implements {import('./types').ITest}

@@ -7,6 +7,14 @@ export declare interface ITest {
 }
 
 /**
+ * A 2nd test interface.
+ */
+export declare interface ITest2 {
+   /** Implementing component must have `bar` getter. */
+   get bar(): () => void;
+}
+
+/**
  * A test type alias.
  */
 export type TypeAlias = {
