@@ -1,0 +1,23 @@
+[
+  [
+    "\u001b[32m[esm-d-ts] Generating DTS bundle for: ./test/fixture/src/javascript/warnings/index.js\u001b[0m"
+  ],
+  [
+    "\u001b[34m[esm-d-ts] Intermediate declarations output path: test/fixture/output/javascript/warnings/.dts\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Duplicated '@implements' tags for `import('./types').ITest` in component documentation: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Skipping @param tag with no name in component documentation: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Skipping @param tag with no type or description in component documentation: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[33m[esm-d-ts] [plugin-svelte] Event types substitution for event name 'unusedEvent' not found in: Warnings.svelte\u001b[0m"
+  ],
+  [
+    "\u001b[35m[esm-d-ts] Output bundled DTS file to: ./test/fixture/output/javascript/warnings/index.d.ts\u001b[0m"
+  ]
+]

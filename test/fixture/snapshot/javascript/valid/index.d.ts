@@ -8,6 +8,13 @@ declare interface ITest {
   get foo(): () => void;
 }
 /**
+ * A 2nd test interface.
+ */
+declare interface ITest2 {
+  /** Implementing component must have `bar` getter. */
+  get bar(): () => void;
+}
+/**
  * A test type alias.
  */
 type TypeAlias = {
@@ -18,16 +25,63 @@ type TypeAlias = {
 };
 
 /**
+ * A test for `svelte:options` accessors.
+ *
+ */
+declare class AccessorsTrue extends SvelteComponent<AccessorsTrue.Props, AccessorsTrue.Events, AccessorsTrue.Slots> {
+  get foo(): (bar: boolean) => void;
+
+  /** Setter for {@link AccessorsTrue.Props.thing | thing} prop. */
+  set thing(_: string);
+
+  /** Getter for {@link AccessorsTrue.Props.thing | thing} prop. */
+  get thing(): string;
+
+  /** Setter for {@link AccessorsTrue.Props.typeAlias | typeAlias} prop. */
+  set typeAlias(_: TypeAlias);
+
+  /** Getter for {@link AccessorsTrue.Props.typeAlias | typeAlias} prop. */
+  get typeAlias(): TypeAlias;
+  /**accessor*/
+  set undefined(_: any);
+  get undefined(): any;
+}
+
+/** Event / Prop / Slot type aliases for {@link AccessorsTrue | associated component}. */
+declare namespace AccessorsTrue {
+  /** Props type alias for {@link AccessorsTrue | associated component}. */
+  export type Props = {
+    /**
+     * Some info
+     *
+     * @type {string}
+     */
+    thing?: string;
+    /**
+     * Test import types for accessors.
+     *
+     * @type {import('./types').TypeAlias}
+     */
+    typeAlias?: TypeAlias;
+    /**
+     * @param {boolean} bar -
+     */
+    foo?: (bar: boolean) => void;
+  };
+  /** Events type alias for {@link AccessorsTrue | associated component}. */
+  export type Events = { [evt: string]: CustomEvent<any> };
+  /** Slots type alias for {@link AccessorsTrue | associated component}. */
+  export type Slots = { default: {} };
+}
+
+/**
  * A test header that is long and has
  * several lines with a bunch of extra data.
  *
  * @hidden
  */
-declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, TjsTest.Slots> implements ITest {
-  /** Getter for {@link TjsTest.Props.foo | foo} prop. */
+declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, TjsTest.Slots> implements ITest2, ITest {
   get foo(): () => void;
-
-  /** Getter for {@link TjsTest.Props.bar | bar} prop. */
   get bar(): () => void;
 }
 
@@ -48,15 +102,15 @@ declare namespace TjsTest {
      */
     thing?: string;
     /**
+     * Something foo
+     */
+    foo?: () => void;
+    /**
      * Test for import types.
      *
      * @type {import('../types').TypeAlias}
      */
     importType?: TypeAlias;
-    /**
-     * Something foo
-     */
-    foo?: () => void;
     bar?: () => void;
   };
   /** Events type alias for {@link TjsTest | associated component}. */
@@ -96,4 +150,13 @@ type TestEvent = {
   foo: boolean;
 };
 
-export { type ITest, JSClass, TjsTest as TJSTest, type TestEvent, type TypeAlias, jsFunction };
+export {
+  AccessorsTrue,
+  type ITest,
+  type ITest2,
+  JSClass,
+  TjsTest as TJSTest,
+  type TestEvent,
+  type TypeAlias,
+  jsFunction,
+};
