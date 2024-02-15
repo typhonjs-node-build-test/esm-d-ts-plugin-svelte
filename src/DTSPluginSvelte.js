@@ -4,8 +4,8 @@ import { fileURLToPath }         from 'node:url';
 import { getFileList }           from '@typhonjs-utils/file-util';
 import { isObject }              from '@typhonjs-utils/object';
 import { resolve }               from 'import-meta-resolve';
-import { compile }               from 'svelte/compiler';
 import { svelte2tsx }            from 'svelte2tsx';
+import ts                        from 'typescript';
 import upath                     from 'upath';
 
 import { JSDocCommentParser }    from './JSDocCommentParser.js';
@@ -29,7 +29,7 @@ export class DTSPluginSvelte
     *
     * @type {RegExp}
     */
-   static #regexScriptIsTS = /<script\s+[^>]*?lang=['"](ts|typescript)['"]/;
+   static #regexScriptIsTS = /<script\s+[^>]*?lang=(['"]?)(ts|typescript)\1[^>]*>/;
 
    /**
     * Replace script contents after JSDoc processing.
@@ -174,10 +174,29 @@ export class DTSPluginSvelte
     * @returns {import('@typhonjs-build-test/esm-d-ts').PluginEvent.Returns['lexer:transform']} Compiled script / JS
     *          section of Svelte component.
     */
-   lexerTransform({ fileData })
+   lexerTransform({ compilerOptions, fileData })
    {
-      const { js } = compile(fileData);
-      return js.code;
+      const isTsFile = DTSPluginSvelte.#regexScriptIsTS.test(fileData);
+      const match = DTSPluginSvelte.#regexScriptContent.exec(fileData);
+
+      const code = match ? match.groups.contents : 'export {};';
+
+      if (isTsFile)
+      {
+         return ts.transpileModule(code, {
+            compilerOptions: {
+               ...compilerOptions,
+               allowImportingTsExtensions: true,
+               declaration: false
+            },
+            jsDocParsingMode: ts.JSDocParsingMode.ParseNone,
+            reportDiagnostics: false
+         }).outputText;
+      }
+      else
+      {
+         return code;
+      }
    }
 
    /**
