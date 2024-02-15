@@ -114,10 +114,12 @@ export class PostprocessDTS
 
                classDeclaration.addImplements(result.identFull);
             }
-            else
-            {
-               classDeclaration.addImplements(entry);
-            }
+
+            // TODO: Presently: it is necessary to use import types for `@implements` as TSC will elide normal imports.
+            // else
+            // {
+            //    classDeclaration.addImplements(entry);
+            // }
          }
 
          // Synthetically add any import types as actual imports in source file.
@@ -166,9 +168,10 @@ export class PostprocessDTS
       eventAlias.addJsDoc({ description: `Events type alias for {@link ${className} | associated component}.` });
       slotAlias.addJsDoc({ description: `Slots type alias for {@link ${className} | associated component}.` });
 
+      const componentTags = comments?.componentTags ? comments.componentTags : [];
       namespace.addJsDoc({
          description: `Event / Prop / Slot type aliases for {@link ${className} | associated component}.`,
-         tags: comments.componentTags
+         tags: componentTags
       });
 
       // Add comments & types from `@property` tags in comment documentation to events. ------------------------------
@@ -277,7 +280,7 @@ export class PostprocessDTS
          {
             const propName = accessorGet.getName();
 
-            if (comments.propTypes.has(propName))
+            if (comments.propNames.has(propName))
             {
                // Add return type.
                const returnType = comments.propTypes.get(propName);
