@@ -1,5 +1,8 @@
 [
   [
+    "\u001b[35m[esm-d-ts] Loading plugins: index.js\u001b[0m"
+  ],
+  [
     "\u001b[32m[esm-d-ts] Checking DTS bundle for: ./test/fixture/src/javascript/warnings/index.js\u001b[0m"
   ],
   [
