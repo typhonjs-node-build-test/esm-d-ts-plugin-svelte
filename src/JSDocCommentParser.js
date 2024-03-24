@@ -1,9 +1,7 @@
 import { parseLeadingComments }  from '@typhonjs-build-test/esm-d-ts/util';
-// import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
+import { ESTreeParsedComment }   from '@typhonjs-build-test/esm-d-ts/util';
 import { Node, Project }         from 'ts-morph';
 import ts                        from 'typescript';
-
-import { ESTreeParsedComment }   from "./ESTreeParsedComment.js";
 
 /**
  * Parses the script section of a Svelte component extracting JSDoc comments to rejoin with the generated declarations.

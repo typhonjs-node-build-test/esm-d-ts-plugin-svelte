@@ -26,7 +26,6 @@ type TypeAlias = {
 
 /**
  * A test for `svelte:options` accessors.
- *
  */
 declare class AccessorsTrue extends SvelteComponent<AccessorsTrue.Props, AccessorsTrue.Events, AccessorsTrue.Slots> {
   /** Getter for {@link AccessorsTrue.Props.foo | foo} prop. */
@@ -90,7 +89,6 @@ declare namespace NoScript {
 /**
  * A test header that is long and has
  * several lines with a bunch of extra data.
- *
  * @hidden
  */
 declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, TjsTest.Slots> implements ITest2, ITest {
@@ -135,7 +133,6 @@ declare namespace TjsTest {
     /**
      * Yo This is multi-line
      * and stuff
-     *
      * and some more text
      */
     'test:foo:bar': CustomEvent<TestEvent>;
