@@ -189,7 +189,8 @@ export class DTSPluginSvelte
                allowImportingTsExtensions: true,
                declaration: false
             },
-            jsDocParsingMode: ts.JSDocParsingMode.ParseNone,
+            /* v8 ignore next 1 */ // Ignore nullish coalescing branch.
+            jsDocParsingMode: ts.JSDocParsingMode?.ParseNone ?? 1, // Added in TS 5.3+
             reportDiagnostics: false
          }).outputText;
       }
