@@ -1,3 +1,7 @@
+import fs         from 'fs-extra';
+
+import ts         from 'typescript';
+
 import {
    beforeAll,
    expect,
@@ -6,8 +10,6 @@ import {
 import {
    checkDTS,
    generateDTS }  from '@typhonjs-build-test/esm-d-ts';
-
-import fs         from 'fs-extra';
 
 describe('Components (javascript)', () =>
 {
@@ -48,7 +50,15 @@ describe('Components (javascript)', () =>
 
          const result = fs.readFileSync('./test/fixture/output/javascript/valid/index.d.ts', 'utf-8');
 
-         expect(result).toMatchFileSnapshot('./fixture/snapshot/javascript/valid/index.d.ts');
+         const tsVersion = parseFloat(ts.versionMajorMinor);
+
+         // Takes into account changes in TS declaration generation pre / post TS `5.3` where setter / accessor
+         // argument names are output as `arg` pre TS `5.3` and `_` post `5.3`.
+         const snapshot = tsVersion >= 5.3 ?
+          './fixture/snapshot/javascript/valid/index-post-5_3.d.ts' :
+           './fixture/snapshot/javascript/valid/index-pre-5_3.d.ts';
+
+         expect(result).toMatchFileSnapshot(snapshot);
       });
    });
 
