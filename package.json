@@ -1,7 +1,7 @@
 {
   "name": "@typhonjs-build-test/esm-d-ts-plugin-svelte",
-  "description": "`esm-d-ts` plugin to generate declarations for ES Module based Svelte 4 components",
-  "version": "0.0.0",
+  "description": "`esm-d-ts` plugin to generate declarations for Svelte 4 components",
+  "version": "0.1.0-next.1",
   "author": "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)",
   "type": "module",
   "exports": {
@@ -17,17 +17,19 @@
   "dependencies": {
   },
   "devDependencies": {
-    "@typhonjs-typedoc/typedoc-pkg": "^0.0.3",
+    "@typhonjs-typedoc/typedoc-pkg": "^0.0.4",
     "@typhonjs-config/eslint-config" : "^0.6.0",
-    "@vitest/coverage-v8": "^1.2.2",
-    "@vitest/ui": "^1.2.2",
-    "eslint": "^8.56.0",
-    "vitest": "^1.2.2"
+    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/ui": "^1.4.0",
+    "eslint": "^8.57.0",
+    "vitest": "^1.4.0"
   },
   "peerDependencies": {
-    "@typhonjs-build-test/esm-d-ts" : "github:typhonjs-node-build-test/esm-d-ts#0.2.3-dev",
+    "@typhonjs-build-test/esm-d-ts" : "^0.3.0-next.2",
     "svelte": "4",
-    "svelte2tsx": ">=0.7.0"
+    "svelte2tsx": ">=0.7.0",
+    "ts-morph": "^22.0.0",
+    "typescript": ">=5.1"
   },
   "engines": {
     "node": ">=18"
