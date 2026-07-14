@@ -10,4 +10,3 @@ npm-debug.log
 /coverage
 /html
 /test/fixture/output
-package-lock.json
