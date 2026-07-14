@@ -1,4 +1,3 @@
-import * as _typhonjs_plugin_manager from '@typhonjs-plugin/manager';
 import * as _typhonjs_build_test_esm_d_ts from '@typhonjs-build-test/esm-d-ts';
 
 /**
@@ -23,6 +22,7 @@ declare class DTSPluginSvelte {
   compileDiagnosticFilter({
     diagnostic,
     diagnosticLog,
+    message,
   }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['compile:diagnostic:filter']): _typhonjs_build_test_esm_d_ts.PluginEvent.Returns['compile:diagnostic:filter'];
   /**
    * Transform any Svelte files via `svelte2tsx` before TSC compilation.
@@ -43,6 +43,7 @@ declare class DTSPluginSvelte {
    *          section of Svelte component.
    */
   lexerTransform({
+    compilerOptions,
     fileData,
   }: _typhonjs_build_test_esm_d_ts.PluginEvent.Data['lexer:transform']): _typhonjs_build_test_esm_d_ts.PluginEvent.Returns['lexer:transform'];
   /**
@@ -64,7 +65,7 @@ declare class DTSPluginSvelte {
   /**
    * @param {import('@typhonjs-plugin/manager').PluginInvokeEvent} ev -
    */
-  onPluginLoad(ev: _typhonjs_plugin_manager.PluginInvokeEvent): void;
+  onPluginLoad(ev: any): void;
   #private;
 }
 
