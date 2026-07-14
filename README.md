@@ -5,7 +5,16 @@
 [![Discord](https://img.shields.io/discord/737953117999726592?label=Discord%20-%20TyphonJS&style=plastic)](https://typhonjs.io/discord/)
 [![Twitch](https://img.shields.io/twitch/status/typhonrt?style=social)](https://www.twitch.tv/typhonrt)
 
+Provides a plugin to add Svelte 4 TypeScript declaration generation to [esm-d-ts](https://www.npmjs.com/package/@typhonjs-build-test/esm-d-ts).
 
-Provides a plugin to add Svelte declaration generation to [esm-d-ts](https://www.npmjs.com/package/@typhonjs-build-test/esm-d-ts).
+It is recommended to install `esm-d-ts` as a developer dependency in `package.json` as follows:
+```json
+{
+  "devDependencies": {
+    "@typhonjs-build-test/esm-d-ts": "^0.4.0"
+    "@typhonjs-build-test/esm-d-ts-plugin-svelte": "^0.1.0"
+  }
+}
+```
 
-This is a beta release (0.1.0-next.1). More info coming soon.
+Requires TypeScript 6.0 < 7 as a peer dependency.
