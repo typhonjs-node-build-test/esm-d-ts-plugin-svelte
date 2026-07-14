@@ -32,7 +32,7 @@ describe('Components (typescript)', () =>
 
          vi.restoreAllMocks();
 
-         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+         await expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
           './fixture/snapshot/typescript/valid/checkDTS-console-log.json');
       });
 
@@ -48,7 +48,7 @@ describe('Components (typescript)', () =>
 
          const result = fs.readFileSync('./test/fixture/output/typescript/valid/index.d.ts', 'utf-8');
 
-         expect(result).toMatchFileSnapshot('./fixture/snapshot/typescript/valid/index.d.ts');
+         await expect(result).toMatchFileSnapshot('./fixture/snapshot/typescript/valid/index.d.ts');
       });
    });
 });

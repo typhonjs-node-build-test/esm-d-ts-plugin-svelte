@@ -32,7 +32,7 @@ describe('Components (javascript)', () =>
 
          vi.restoreAllMocks();
 
-         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+         await expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
           './fixture/snapshot/javascript/valid/checkDTS-console-log.json');
       });
 
@@ -50,7 +50,7 @@ describe('Components (javascript)', () =>
 
          const snapshot = './fixture/snapshot/javascript/valid/index.d.ts';
 
-         expect(result).toMatchFileSnapshot(snapshot);
+         await expect(result).toMatchFileSnapshot(snapshot);
       });
    });
 
@@ -69,7 +69,7 @@ describe('Components (javascript)', () =>
 
          vi.restoreAllMocks();
 
-         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+         await expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
           './fixture/snapshot/javascript/warnings/checkDTS-console-log.json');
       });
 
@@ -88,7 +88,7 @@ describe('Components (javascript)', () =>
 
          vi.restoreAllMocks();
 
-         expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
+         await expect(JSON.stringify(consoleLog, null, 2)).toMatchFileSnapshot(
           './fixture/snapshot/javascript/warnings/generateDTS-console-log.json');
       });
    });
