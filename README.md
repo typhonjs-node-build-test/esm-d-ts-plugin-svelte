@@ -11,7 +11,7 @@ It is recommended to install `esm-d-ts` as a developer dependency in `package.js
 ```json
 {
   "devDependencies": {
-    "@typhonjs-build-test/esm-d-ts": "^0.4.0"
+    "@typhonjs-build-test/esm-d-ts": "^0.4.0",
     "@typhonjs-build-test/esm-d-ts-plugin-svelte": "^0.1.0"
   }
 }
