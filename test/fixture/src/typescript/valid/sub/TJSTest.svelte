@@ -23,12 +23,12 @@
     *
     * Because
     */
-   export let thing: string = void 0;
+   export let thing: string | undefined = void 0;
 
    /**
     * Test for import types.
     */
-   export let importType: TypeAlias = void 0;
+   export let importType: TypeAlias | undefined = void 0;
 
    /**
     * Something foo

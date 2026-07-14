@@ -9,14 +9,14 @@
    /**
     * Some info
     *
-    * @type {string}
+    * @type {string | undefined}
     */
    export let thing = void 0;
 
    /**
     * Test import types for accessors.
     *
-    * @type {import('./types').TypeAlias}
+    * @type {import('./types').TypeAlias | undefined}
     */
    export let typeAlias = void 0;
 

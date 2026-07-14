@@ -11,12 +11,12 @@
    /**
     * Some info
     */
-   export let thing: string = void 0;
+   export let thing: string | undefined = void 0;
 
    /**
     * Test for accessors.
     */
-   export let typeAlias: TypeAlias = void 0;
+   export let typeAlias: TypeAlias | undefined = void 0;
 
    /**
     * A bar test

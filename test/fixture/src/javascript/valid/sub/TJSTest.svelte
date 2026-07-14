@@ -22,14 +22,14 @@
     *
     * Because
     *
-    * @type {string}
+    * @type {string | undefined}
     */
    export let thing = void 0;
 
    /**
     * Test for import types.
     *
-    * @type {import('../types').TypeAlias}
+    * @type {import('../types').TypeAlias | undefined}
     */
    export let importType = void 0;
 

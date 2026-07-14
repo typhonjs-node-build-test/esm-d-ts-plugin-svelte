@@ -26,22 +26,23 @@ type TypeAlias = {
 
 /**
  * A test for `svelte:options` accessors.
+ *
  */
 declare class AccessorsTrue extends SvelteComponent<AccessorsTrue.Props, AccessorsTrue.Events, AccessorsTrue.Slots> {
   /** Getter for {@link AccessorsTrue.Props.foo | foo} prop. */
   get foo(): (bar: boolean) => void;
 
   /** Getter for {@link AccessorsTrue.Props.thing | thing} prop. */
-  get thing(): string;
+  get thing(): string | undefined;
 
   /** Setter for {@link AccessorsTrue.Props.thing | thing} prop. */
-  set thing(_: string);
+  set thing(_: string | undefined);
 
   /** Getter for {@link AccessorsTrue.Props.typeAlias | typeAlias} prop. */
-  get typeAlias(): TypeAlias;
+  get typeAlias(): TypeAlias | undefined;
 
   /** Setter for {@link AccessorsTrue.Props.typeAlias | typeAlias} prop. */
-  set typeAlias(_: TypeAlias);
+  set typeAlias(_: TypeAlias | undefined);
   get undefined(): any;
   /**accessor*/
   set undefined(_: any);
@@ -54,15 +55,15 @@ declare namespace AccessorsTrue {
     /**
      * Some info
      */
-    thing?: string;
+    thing?: string | undefined;
     /**
      * Test for accessors.
      */
-    typeAlias?: TypeAlias;
+    typeAlias?: TypeAlias | undefined;
     /**
      * A bar test
      */
-    foo?: (bar: boolean) => void;
+    foo?: ((bar: boolean) => void) | undefined;
   };
   /** Events type alias for {@link AccessorsTrue | associated component}. */
   export type Events = { [evt: string]: CustomEvent<any> };
@@ -85,22 +86,23 @@ declare namespace NoScript {
 /**
  * A test header that is long and has
  * several lines with a bunch of extra data.
+ *
  * @hidden
  */
-declare class TjsTest extends SvelteComponent<TjsTest.Props, TjsTest.Events, TjsTest.Slots> implements ITest2, ITest {
-  /** Getter for {@link TjsTest.Props.foo | foo} prop. */
+declare class TJSTest extends SvelteComponent<TJSTest.Props, TJSTest.Events, TJSTest.Slots> implements ITest2, ITest {
+  /** Getter for {@link TJSTest.Props.foo | foo} prop. */
   get foo(): () => void;
 
-  /** Getter for {@link TjsTest.Props.bar | bar} prop. */
+  /** Getter for {@link TJSTest.Props.bar | bar} prop. */
   get bar(): () => void;
 }
 
 /**
- * Event / Prop / Slot type aliases for {@link TjsTest | associated component}.
+ * Event / Prop / Slot type aliases for {@link TJSTest | associated component}.
  * @hidden
  */
-declare namespace TjsTest {
-  /** Props type alias for {@link TjsTest | associated component}. */
+declare namespace TJSTest {
+  /** Props type alias for {@link TJSTest | associated component}. */
   export type Props = {
     /**
      * Some info that has data over several
@@ -108,29 +110,31 @@ declare namespace TjsTest {
      *
      * Because
      */
-    thing?: string;
+    thing?: string | undefined;
     /**
      * Test for import types.
      */
-    importType?: TypeAlias;
+    importType?: TypeAlias | undefined;
     /**
      * Something foo
      */
-    foo?: () => void;
-    bar?: () => void;
+    foo?: (() => void) | undefined;
+    bar?: (() => void) | undefined;
   };
-  /** Events type alias for {@link TjsTest | associated component}. */
+  /** Events type alias for {@link TJSTest | associated component}. */
   export type Events = {
     keydown: KeyboardEvent;
     /**
      * Yo This is multi-line
      * and stuff
+     *
      * and some more text
      */
     'test:foo:bar': CustomEvent<TypeAlias>;
   } & { [evt: string]: CustomEvent<any> };
-  /** Slots type alias for {@link TjsTest | associated component}. */
+  /** Slots type alias for {@link TJSTest | associated component}. */
   export type Slots = {};
 }
 
-export { AccessorsTrue, type ITest, type ITest2, NoScript, TjsTest as TJSTest, type TypeAlias };
+export { AccessorsTrue, NoScript, TJSTest };
+export type { ITest, ITest2, TypeAlias };
